@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.3"
+SCRIPT_VERSION="1.4"
 SCRIPT_NAME="Template Gen"
-HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n"
+HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -q, --quiet\t\tNo prompts, use defaults.\n"
 VERSION_MESSAGE="$SCRIPT_NAME version $SCRIPT_VERSION"
 
 function writeFile() {
@@ -24,7 +24,10 @@ function writeFile() {
 function createFile() {
     script_name=$1
     file_name=${script_name,,} && file_name=${file_name// /-} && file_name="${file_name}.sh"
-    read -p "Script description (empty for default): " script_description
+
+    if [[ ! $2 ]]; then
+        read -p "Script description (empty for default): " script_description
+    fi
     script_description=${script_description:="a Bash Script"}
 
     writeFile "$file_name" "$script_name" "$script_description"
@@ -36,6 +39,8 @@ while [[ "$1" =~ ^- ]]; do
         -h | --help) echo -e $HELP_MESSAGE & exit ;;
 
         -V | --version) echo -e $VERSION_MESSAGE & exit ;;
+
+        -q | --quiet) createFile "${*:2}" 1 && exit ;;
 
         -*) echo "Option $1 not recognized" & exit ;;
 
