@@ -19,14 +19,14 @@ function exportProfile() {
     profile_file="$(getFilePath $1)"
     dconf dump /org/gnome/terminal/legacy/profiles:/ > "$profile_file"
 
-    echo "Profile exported successfully"
+    echo "Profile exported successfully."
 }
 
 function importProfile() {
     profile_file="$(getFilePath $1)"
     dconf load /org/gnome/terminal/legacy/profiles:/ < "$profile_file"
 
-    echo "Profile imported successfully"
+    echo "Profile imported successfully."
 }
 
 while [[ "$1" =~ ^- ]]; do
