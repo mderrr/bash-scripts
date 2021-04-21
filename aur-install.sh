@@ -1,27 +1,49 @@
 #!/bin/bash
 
-_package=$1
-package_name=${_package##*.org/}
-package_name=${package_name%.git*}
-
-AUR_DIR="/home/$USER/Repositories/AUR/"
-GIT_DIR=$AUR_DIR$package_name
+SCRIPT_VERSION="1.1"
+SCRIPT_NAME="AUR Install"
+HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, an AUR Install Helper\nUsage: aur-install [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n"
+VERSION_MESSAGE="$SCRIPT_NAME version $SCRIPT_VERSION"
 
 function cloneAndMake() {
-	git clone $_package $GIT_DIR
-	cd $GIT_DIR && makepkg -sirc
+	git clone $1 $2
+	cd $2 && makepkg -sirc
 }
 
 function removeDir() {
 	echo "Cleaning up..."
-	rm -r -f $GIT_DIR
+	rm -r -f $1
 }
 
-if [ ! -d "$AUR_DIR" ]; then
-	echo "AUR folder not found, creating one in ~/Repositories/AUR"
-	mkdir $AUR_DIR
-fi
+function checkDir() {
+	package=$1
+	package_name=${package##*.org/} && package_name=${package_name%.git*}
+	repo_dir="/home/$USER/Repositories/"
+	git_dir=$repo_dir$package_name
 
-cloneAndMake
-removeDir
-echo "Done."
+	if [ ! -d "$git_dir" ]; then
+		echo "Repository folder not found, creating one in '~/Repositories/'"
+		mkdir $repo_dir
+	fi
+
+	cloneAndMake "$package" "$git_dir"
+	removeDir "$git_dir"
+
+	echo "AUR package installed successfully."
+}
+
+while [[ "$1" =~ ^- ]]; do
+	case "$1" in
+
+        -h | --help) echo -e $HELP_MESSAGE & exit ;;
+        
+        -V | --version) echo -e $VERSION_MESSAGE & exit ;;
+
+        -*) echo "Option $1 not recognized" & exit ;;
+
+	esac
+
+	shift
+done
+
+checkDir $1
