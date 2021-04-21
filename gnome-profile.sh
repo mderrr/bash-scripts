@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.2"
+SCRIPT_VERSION="1.3"
 SCRIPT_NAME="Gnome Profile"
-HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, an Archlinux Terminal Profile Utility\nUsage: gnome-profile [OPTIONS]... [Custom Path]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -I, --import\t\tImport profile from file.\n -E, --export\t\tExport profile to file. (Default)\n"
+HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, an Archlinux Terminal Profile Utility\nUsage: gnome-profile [Options]... [Custom Path]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -I, --import\t\tImport profile from file.\n -E, --export\t\tExport profile to file. (Default)\n"
 VERSION_MESSAGE="$SCRIPT_NAME version $SCRIPT_VERSION"
 
 function getFilePath() {

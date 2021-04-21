@@ -1,8 +1,9 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.0"
-HELP_MESSAGE="\nFont Installer $SCRIPT_VERSION, an archlinux automatic font installer utility\nUsage: font-installer [OPTIONS]... [Fonts Folder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -F, --format\t\tSpecify a file format for the font files.\n"
-VERSION_MESSAGE="Font Installer version $SCRIPT_VERSION"
+SCRIPT_VERSION="1.2"
+SCRIPT_NAME="Font Installer"
+HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, an Archlinux Automatic Font Installer \nUsage: font-installer [Options]... [Fonts Folder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -F, --format\t\tSpecify a file format for the font files.\n -d, --directory\tSpecify a directory to install fonts from.\n"
+VERSION_MESSAGE="$SCRIPT_NAME version $SCRIPT_VERSION"
 USER_NAME="$(whoami)"
 FILE_FORMAT=".ttf"
 FOLDER_PATH="/home/$USER_NAME/Fonts/"
@@ -31,6 +32,7 @@ function installFonts() {
         done
     done
 
+    echo "Fonts installed successfully. "
     exit
 }
 
@@ -42,7 +44,7 @@ if [ -z "$1" ]; then
     echo "No directory specified with -d, defaulting to '~/Fonts'"
 fi
 
-while [ -n "$1" ]; do 
+while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
         -h | --help) echo -e $HELP_MESSAGE & exit ;;
@@ -53,7 +55,7 @@ while [ -n "$1" ]; do
 
         -d | --directory) FOLDER_PATH=$2 ;;
 
-        -*) echo "Option $1 not recognized" ;;
+        -*) echo "Option $1 not recognized" & exit ;;
 
 	esac
 
