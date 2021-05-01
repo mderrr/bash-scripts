@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6"
+SCRIPT_VERSION="1.7"
 SCRIPT_NAME="TAUR"
 
-HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -I, --install\t\t\tInstall the specified package (Default Option).\n -C, --check-updates\t\tCheck for updates for installed packages.\n -CI, --install-updates\t\tCheck and Install updates for installed packages.\n\n"
+HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -I, --install\t\t\tInstall the specified package (Default Option).\n -u, --update\t\t\tFind updates for installed packages.\n -Iu, --install-updates\t\tFind and Install updates for installed packages.\n -Q, --query\t\t\tSearch installed packages.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 REMOVING_DIR_MESSAGE="Cleaning up...\n"
@@ -14,14 +14,21 @@ INSTALLING_UPDATED_PACKAGES_MESSAGE="Installing updated packages...\n"
 UPDATED_PACKAGE_NOT_FOUND_MESSAGE="Package: '%s' not found in out-dated packages list, skipping installation.\n"
 OUTDATED_PACKAGES_FOUND_MESSAGE="\nFound one or more packages that are out-dated, run 'taur -CI' to install all updates, or specify a list of packages to update.\n"
 ALL_PACKAGES_UPDATED_MESSAGE="\nAll packages are up-to-date with the Arch User Repository.\n"
+NO_MATCHING_PACKAGES_FOUND_MESSAGE="No matching packages found\n"
+CONNECTION_NOT_FOUND_MESSAGE="Could not connect to the AUR, please try again.\n"
+INSTALLED_PACKAGES_MESSAGE="Installed packages:\n\n"
+NO_LINK_PROVIDED_MESSAGE="No link provided, aborting installation.\n"
 
 CONFIG_FILE_PACKAGE_HEADER="[Package]\t\t\t\t\t\t[Version]\n"
 
 CONFIG_FILE_PATH="/home/$USER/.config/taur/taur.conf"
 CONFIG_DIR_PATH=${CONFIG_FILE_PATH%/*}
 
-CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE="%s [ OUTDATED ]\n"
-CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE="%s [ OK ]\n"
+NEWLINE="\n"
+
+CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE=" %s [ OUTDATED ]\n"
+CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE=" %s [ OK ]\n"
+QUERY_RESULT_TEMPLATE="%s\n"
 
 REPOSITORIES_DIRECTORY="/home/$USER/Repositories/"
 
@@ -122,6 +129,11 @@ function installPackage() {
 	local package_name=${package_link##*.org/} && package_name=${package_name%.git*}
 	local git_directory=$REPOSITORIES_DIRECTORY$package_name
 
+	if [[ -z "$package_link" ]]; then
+		printf "$NO_LINK_PROVIDED_MESSAGE"
+		exit
+	fi
+
 	printf "$INSTALLING_PACKAGE_MESSAGE" "$package_name" 
 
 	checkConfigFile
@@ -168,19 +180,32 @@ function installUpdates() {
 	done
 }
 
+function checkForConnection() {
+	ping -c 1 -q google.com >&/dev/null
+	
+	echo $?
+}
+
 function checkUpdates() {
 	local install_updates="${1:-false}"
 	local packages_to_update="$2"
 	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
+	local isConnected=$(checkForConnection)
 	local outdated_packages=()
 
-	for ((i = 2 ; i < $number_of_lines ; i++)); do
+	if [[ $isConnected -ne 0 ]]; then
+		printf "$CONNECTION_NOT_FOUND_MESSAGE" & exit
+	fi
+
+	printf "$INSTALLED_PACKAGES_MESSAGE"
+
+	for ((i = 2 ; i < $number_of_lines + 1 ; i++)); do
 		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
 		local version=($current_line) && version=${version[-1]}
 		local package_name=${current_line%$version}
 
 		if [[ $(checkIfIsUpdated "$package_name" "$version") == false ]]; then
-			outdated_packages=("${outdated_packages[@]}" "$package_name") 
+			outdated_packages=("${outdated_packages[@]}" "$package_name")
 		fi
 
 	done
@@ -198,6 +223,37 @@ function checkUpdates() {
 	fi
 }
 
+function displayQueryResults() {
+	local filter=${1,,}
+	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
+	local query_results=()
+
+	for ((i = 2 ; i < $number_of_lines + 1 ; i++)); do
+		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
+		local version=($current_line) && version=${version[-1]}
+		local package_name=${current_line%$version} && package_name=${package_name//[[:blank:]]/}
+		local query_result="$package_name $version"
+
+		if [[ -z $filter ]]; then
+			query_results=("${query_results[@]}" "$query_result")
+		
+		else
+			if [[ "$package_name" == *"$filter"* ]]; then
+				query_results=("${query_results[@]}" "$query_result")
+			fi
+		fi	
+		
+	done
+
+	if [[ -z "${query_results[@]}" ]]; then
+		printf "$NO_MATCHING_PACKAGES_FOUND_MESSAGE"
+	fi
+	
+	for result in "${query_results[@]}"; do
+		printf "$QUERY_RESULT_TEMPLATE" "$result"
+	done
+}
+
 while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
@@ -205,11 +261,13 @@ while [[ "$1" =~ ^- ]]; do
         
         -V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
-		-I | --install) installPackage "$1" && exit ;;
+		-I | --install) installPackage $2 && exit ;;
 
-		-C | --check-updates) checkUpdates false "${*:2}" && exit ;;
+		-u | --update) checkUpdates false "${*:2}" && exit ;;
 
-		-CI | --install-updates) checkUpdates true "${*:2}" && exit ;;
+		-Iu | --install-updates) checkUpdates true "${*:2}" && exit ;;
+
+		-Q | --query) displayQueryResults $2 && exit ;;
 
         -*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
