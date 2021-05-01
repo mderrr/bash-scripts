@@ -1,104 +1,59 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.3"
-SCRIPT_NAME="Tool for AUR"
-HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, an AUR Install Helper\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n"
-VERSION_MESSAGE="$SCRIPT_NAME version $SCRIPT_VERSION"
+SCRIPT_VERSION="1.6"
+SCRIPT_NAME="TAUR"
+
+HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -I, --install\t\t\tInstall the specified package (Default Option).\n -C, --check-updates\t\tCheck for updates for installed packages.\n -CI, --install-updates\t\tCheck and Install updates for installed packages.\n\n"
+VERSION_MESSAGE="%s version %s\n"
+OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
+REMOVING_DIR_MESSAGE="Cleaning up...\n"
+REPOSITORY_DIRECTORY_NOT_FOUND_MESSAGE="Repository folder not found, creating one in '~/Repositories/'\n"
+INSTALLING_PACKAGE_MESSAGE="Installing package: %s...\n"
+SUCCESSFULLY_INSTALLED_MESSAGE="AUR package: %s was installed successfully.\n"
+INSTALLING_UPDATED_PACKAGES_MESSAGE="Installing updated packages...\n"
+UPDATED_PACKAGE_NOT_FOUND_MESSAGE="Package: '%s' not found in out-dated packages list, skipping installation.\n"
+OUTDATED_PACKAGES_FOUND_MESSAGE="\nFound one or more packages that are out-dated, run 'taur -CI' to install all updates, or specify a list of packages to update.\n"
+ALL_PACKAGES_UPDATED_MESSAGE="\nAll packages are up-to-date with the Arch User Repository.\n"
+
+CONFIG_FILE_PACKAGE_HEADER="[Package]\t\t\t\t\t\t[Version]\n"
+
 CONFIG_FILE_PATH="/home/$USER/.config/taur/taur.conf"
 CONFIG_DIR_PATH=${CONFIG_FILE_PATH%/*}
 
+CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE="%s [ OUTDATED ]\n"
+CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE="%s [ OK ]\n"
+
+REPOSITORIES_DIRECTORY="/home/$USER/Repositories/"
+
+sedStartLine() { sed -n '/<div id="pkgdetails" class="box">/,$p'; }
+sedEndLine() { sed -n '/<div id="detailslinks" class="listing">/q;p'; }
+
 function cloneAndMake() {
 	local package_link=$1
-	local repository_dir=$2
-	echo "$package_link and $repository_dir"
-	git clone $package_link $repository_dir
-	
-	cd $repository_dir && makepkg -sirc
+	local repository_directory=$2
+
+	git clone $package_link $repository_directory
+	cd $repository_directory && makepkg -sirc
 }
 
 function removeDir() {
-	echo "Cleaning up..."
-	rm -r -f $1
+	local directory=$1
+	printf "$REMOVING_DIR_MESSAGE"
+
+	rm -r -f directory
 }
 
 function checkRepoDir() {
-	local repo_dir=$1
+	local repositories_directory=$1
 
-	if [ ! -d "$repo_dir" ]; then
-		echo "Repository folder not found, creating one in '~/Repositories/'"
-		mkdir $repo_dir
+	if [[ ! -d "$repositories_directory" ]]; then
+		printf "$REPOSITORY_DIRECTORY_NOT_FOUND_MESSAGE" 
+		mkdir $repositories_directory
 	fi
-}
-
-function installPackage() {
-	local package_link=$1
-	local package_name=${package_link##*.org/} && package_name=${package_name%.git*}
-	local repo_dir="/home/$USER/Repositories/"
-	local git_dir=$repo_dir$package_name
-
-	
-	checkConfigFile
-	checkRepoDir "$repo_dir"
-	cloneAndMake "$package_link" "$git_dir"
-	removeDir "$git_dir"
-
-
-	saveNewPackage "$package_name"
-
-	echo "AUR package installed successfully."
-}
-
-function fetchCurrentVersion() {
-	local package_name=$1
-
-    sedStartLine() { sed -n '/<div id="pkgdetails" class="box">/,$p'; }
-    sedEndLine() { sed -n '/<div id="detailslinks" class="listing">/q;p'; }
-
-    local lastest_version=$(curl https://aur.archlinux.org/packages/$package_name/ --silent | sedStartLine | sedEndLine | tail -n+2)
-    lastest_version=${lastest_version#*"<h2>Package Details: $package_name"}
-    lastest_version=${lastest_version%"</h2>"}
-    
-    echo $lastest_version
-}
-
-function calculateTabs() {
-	number_of_tabs=$(("(-($1+1) / 8) + 7"))
-	echo "$number_of_tabs"
-}
-
-function getTabbedString() {
-	string_length=${#1}
-	number_of_tabs=$(calculateTabs $string_length)
-	string="$1"
-
-	for ((i = 0 ; i < $number_of_tabs ; i++)); do
-		string="${string}\t"
-	done
-	string="${string}$2"
-	echo "$string"
-}
-
-function deleteCoincidences() {
-	local package_name=$1
-	local package_found=$(grep -Fxq "$package_name" $CONFIG_FILE_PATH)
-
-	if [[ package_found ]]; then
-		sed -i -e "s/^$package_name.*$//g" $CONFIG_FILE_PATH && sed -i "/^$/d" $CONFIG_FILE_PATH
-	fi
-}
-
-function saveNewPackage() {
-	local package_name=$1
-	local current_version="$(fetchCurrentVersion $package_name)"
-	
-	deleteCoincidences "$package_name"
-	tabbed_string=$(getTabbedString $package_name $current_version)
-
-	echo -e "$tabbed_string" >> $CONFIG_FILE_PATH
 }
 
 function createConfigFile() {
-	echo -e "[Package]\t\t\t\t\t\t[Version]" > $CONFIG_FILE_PATH
+	printf "$CONFIG_FILE_PACKAGE_HEADER" > $CONFIG_FILE_PATH
 }
 
 function checkConfigFile() {
@@ -111,23 +66,111 @@ function checkConfigFile() {
 	fi
 }
 
+function calculateTabs() {
+	local string_length=$1
+
+	number_of_tabs=$(("(-($string_length+1) / 8) + 7"))
+
+	echo "$number_of_tabs"
+}
+
+function getTabbedString() {
+	local string="$1"
+	local string_length=${#1}
+	local number_of_tabs=$(calculateTabs $string_length)
+	
+	for ((i = 0 ; i < $number_of_tabs ; i++)); do
+		string="${string}\t"
+	done
+
+	string="${string}$2"
+
+	echo "$string"
+}
+
+function deleteCoincidences() {
+	local package_name=$1
+	local package_found=$(grep -Fxq "$package_name" $CONFIG_FILE_PATH)
+
+	if [[ package_found ]]; then
+		sed -i -e "s/^$package_name.*$//g" $CONFIG_FILE_PATH && sed -i "/^$/d" $CONFIG_FILE_PATH
+	fi
+}
+
+function fetchCurrentVersion() {
+	local package_name=$1
+	local lastest_version=$(curl https://aur.archlinux.org/packages/$package_name/ --silent | sedStartLine | sedEndLine | tail -n+2)
+
+    lastest_version=${lastest_version#*"<h2>Package Details: $package_name"}
+    lastest_version=${lastest_version%"</h2>"}
+    
+    echo $lastest_version
+}
+
+function saveNewPackage() {
+	local package_name=$1
+	local current_version="$(fetchCurrentVersion $package_name)"
+	
+	deleteCoincidences "$package_name"
+	tabbed_string=$(getTabbedString $package_name $current_version)
+
+	printf "$tabbed_string" >> $CONFIG_FILE_PATH
+}
+
+function installPackage() {
+	local package_link=$1
+	local package_name=${package_link##*.org/} && package_name=${package_name%.git*}
+	local git_directory=$REPOSITORIES_DIRECTORY$package_name
+
+	printf "$INSTALLING_PACKAGE_MESSAGE" "$package_name" 
+
+	checkConfigFile
+	checkRepoDir "$REPOSITORIES_DIRECTORY"
+	cloneAndMake "$package_link" "$git_directory"
+	removeDir "$git_directory"
+
+	saveNewPackage "$package_name"
+
+	printf "$SUCCESSFULLY_INSTALLED_MESSAGE" "$package_name" 
+}
+
 function checkIfIsUpdated() {
 	local package_name=$1
 	local current_version=$2
 	local lastest_version=$(fetchCurrentVersion $package_name)
-	local outdated_packages=()
 	
 	if [[ $current_version != $lastest_version ]]; then
-		echo "$package_name [ OUTDATED ]" > /dev/tty
+		printf "$CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE" "$package_name" > /dev/tty
 		echo false
 	else
-		echo "$package_name [ OK ]" > /dev/tty
+		printf "$CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE" "$package_name" > /dev/tty
 		echo true
 	fi
 }
 
+function installUpdates() {
+	local outdated_package_list=$1
+	local packages_to_update=${2:-"$outdated_package_list"} && packages_to_update=($packages_to_update)
+
+	printf "$INSTALLING_UPDATED_PACKAGES_MESSAGE"
+
+	for package in "${packages_to_update[@]}"; do
+		if [[ "${outdated_package_list[@]}" =~ "${package}" ]]; then
+			package=${package//[[:blank:]]/}
+			local package_link="https://aur.archlinux.org/${package}.git"
+
+			installPackage "$package_link"
+		
+		else
+			printf "$UPDATED_PACKAGE_NOT_FOUND_MESSAGE" "$package" 
+			exit
+		fi
+	done
+}
+
 function checkUpdates() {
 	local install_updates="${1:-false}"
+	local packages_to_update="$2"
 	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
 	local outdated_packages=()
 
@@ -137,44 +180,42 @@ function checkUpdates() {
 		local package_name=${current_line%$version}
 
 		if [[ $(checkIfIsUpdated "$package_name" "$version") == false ]]; then
-			#echo "$package_name [ OUTDATED ]"
 			outdated_packages=("${outdated_packages[@]}" "$package_name") 
 		fi
 
 	done
 
-	echo ${#outdated_packages[@]}
+	if [[ "${outdated_packages[@]}" > 0 ]]; then
+		if [[ "$install_updates" == true ]]; then
+			installUpdates "$outdated_packages" "$packages_to_update"
 
-	if [[ "${#outdated_packages[@]}" > 0 && "$install_updates" == true ]]; then
-		echo "aaaa"
-		echo "${outdated_packages[@]}"
+		else
+			printf "$OUTDATED_PACKAGES_FOUND_MESSAGE"
+		fi
 
-		for package in "${outdated_packages[@]}"; do
-			package=${package//[[:blank:]]/}
-			local package_link="https://aur.archlinux.org/${package}.git"
-
-			installPackage "$package_link"
-		done
+	else
+		printf "$ALL_PACKAGES_UPDATED_MESSAGE"
 	fi
-
-	
 }
 
 while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
-        -h | --help) echo -e $HELP_MESSAGE & exit ;;
+        -h | --help) printf "$HELP_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
         
-        -V | --version) echo -e $VERSION_MESSAGE & exit ;;
+        -V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
-		-C | --check-updates) checkUpdates true && exit ;;
+		-I | --install) installPackage "$1" && exit ;;
 
-        -*) echo "Option $1 not recognized" & exit ;;
+		-C | --check-updates) checkUpdates false "${*:2}" && exit ;;
+
+		-CI | --install-updates) checkUpdates true "${*:2}" && exit ;;
+
+        -*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 
 	shift
 done
 
-#installPackage $1
-#checkConfigFile
+installPackage $1
