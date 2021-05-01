@@ -39,8 +39,8 @@ function installPackage() {
 	
 	checkConfigFile
 	checkRepoDir "$repo_dir"
-	#	cloneAndMake "$package_link" "$git_dir"
-	#removeDir "$git_dir"
+	cloneAndMake "$package_link" "$git_dir"
+	removeDir "$git_dir"
 
 
 	saveNewPackage "$package_name"
@@ -124,8 +124,6 @@ function checkIfIsUpdated() {
 		echo "$package_name [ OK ]" > /dev/tty
 		echo true
 	fi
-
-	
 }
 
 function checkUpdates() {
@@ -145,7 +143,9 @@ function checkUpdates() {
 
 	done
 
-	if [[ "$install_updates" == true ]]; then
+	echo ${#outdated_packages[@]}
+
+	if [[ "${#outdated_packages[@]}" > 0 && "$install_updates" == true ]]; then
 		echo "aaaa"
 		echo "${outdated_packages[@]}"
 
@@ -176,5 +176,5 @@ while [[ "$1" =~ ^- ]]; do
 	shift
 done
 
-installPackage $1
+#installPackage $1
 #checkConfigFile
