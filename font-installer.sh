@@ -1,69 +1,91 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.2"
+SCRIPT_VERSION="1.3"
 SCRIPT_NAME="Font Installer"
-HELP_MESSAGE="\n$SCRIPT_NAME $SCRIPT_VERSION, an Archlinux Automatic Font Installer \nUsage: font-installer [Options]... [Fonts Folder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -F, --format\t\tSpecify a file format for the font files.\n -d, --directory\tSpecify a directory to install fonts from.\n"
-VERSION_MESSAGE="$SCRIPT_NAME version $SCRIPT_VERSION"
+HELP_MESSAGE="\n%s %s, an Archlinux Automatic Font Installer \nUsage: font-installer [Options]... [Fonts Folder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -F, --format\t\tSpecify a file format for the font files.\n -d, --directory\tSpecify a directory to install fonts from.\n\n"
+VERSION_MESSAGE="%s version %s\n"
+
 USER_NAME="$(whoami)"
+
 FILE_FORMAT=".ttf"
+
 FOLDER_PATH="/home/$USER_NAME/Fonts/"
 FONT_INSTALLATION_PATH="/home/$USER_NAME/.local/share/fonts"
 
+SPECIFIED_FOLDER_NOT_FOUND_MESSAGE="The folder '%s' was not found, please check the name.\n"
+OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
+FONT_INSTALLATION_FOLDER_NOT_FOUND_MESSAGE="The font installation folder was not found, creating one at '~/.local/share/fonts/%s'...\n"
+FONTS_INSTALLED_SUCCESSFULLY_MESSAGE="Fonts installed successfully.\n"
+DONT_RUN_AS_ROOT_MESSAGE="Do not run this script as root!\n"
+NO_DIRECTORY_SPECIFIED_MESSAGE="No directory specified with -d, defaulting to '~/Fonts'\n"
+NO_FILES_FOUND_IN_DIRECTORY_MESSAGE="No %s files found in %s, aborting installation.\n"
+
 function installFonts() {
-    folder="$FOLDER_PATH"
-    file_format_folder=${FILE_FORMAT##*.}
-    full_font_installation_path="$FONT_INSTALLATION_PATH/$file_format_folder"
+    local folder_path=${1:-"$FOLDER_PATH"}
+    local file_format_folder_name=${FILE_FORMAT##*.}
+    local full_font_installation_path="$FONT_INSTALLATION_PATH/$file_format_folder_name"
 
     if [ ! -d "$full_font_installation_path" ]; then
-        echo "The font installation folder was not found, creating one at '~/.local/share/fonts/$file_format_folder'..."
-        mkdir "$FONT_INSTALLATION_PATH" && mkdir "$full_font_installation_path"
+        printf "$FONT_INSTALLATION_FOLDER_NOT_FOUND_MESSAGE" "$file_format_folder_name" 
+        mkdir -p "$full_font_installation_path"
     fi
-
-    for subfolder in $FOLDER_PATH*; do
+    
+    for subfolder in $folder_path*; do
         subfolder_name=${subfolder##*/} && subfolder_name=${subfolder_name// /""} && subfolder_name=${subfolder_name//_/""}
         subfolder_path="$full_font_installation_path/$subfolder_name"
 
         if [ ! -d "$subfolder_path" ]; then
-            mkdir "$subfolder_path"
+            mkdir -p "$subfolder_path"
         fi
 
         for file in "$subfolder"/*$FILE_FORMAT; do
+            if [[ "$file" =~ "*$FILE_FORMAT" ]]; then 
+                printf "$NO_FILES_FOUND_IN_DIRECTORY_MESSAGE" "$FILE_FORMAT" "$folder_path" & exit
+            fi 
+
             cp "$file" "$subfolder_path"
         done
     done
 
-    echo "Fonts installed successfully. "
+    printf "$FONTS_INSTALLED_SUCCESSFULLY_MESSAGE"
     exit
 }
 
-if [ "$EUID" = 0 ]; then
-    echo "Do not run this script as root!" & exit
-fi
+function checkCustomFolder() {
+    local folder_path=${1:-"$FOLDER_PATH"} && folder_path="${folder_path}/"
 
-if [ -z "$1" ]; then
-    echo "No directory specified with -d, defaulting to '~/Fonts'"
-fi
+    FILE_FORMAT=${2:-"$FILE_FORMAT"}
+
+    if [[ "$folder_path" == "$FOLDER_PATH" ]]; then
+        printf "$NO_DIRECTORY_SPECIFIED_MESSAGE"
+    fi
+
+    if [ -d "$folder_path" ]; then
+        installFonts $folder_path
+    else
+        printf "$SPECIFIED_FOLDER_NOT_FOUND_MESSAGE" "$folder_path"
+        exit
+    fi
+}
 
 while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
-        -h | --help) echo -e $HELP_MESSAGE & exit ;;
+        -h | --help) printf "$HELP_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
         
-        -V | --version) echo -e $VERSION_MESSAGE & exit ;;
+        -V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
-        -F | --format) FILE_FORMAT=$2 && FOLDER_PATH=$3 ;;
+        -F | --format) checkCustomFolder "$3" "$2" ;;
 
-        -d | --directory) FOLDER_PATH=$2 ;;
-
-        -*) echo "Option $1 not recognized" & exit ;;
+        -*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 
 	shift
 done
 
-if [ -d "$FOLDER_PATH" ]; then
-    installFonts $FOLDER_PATH
-else
-    echo "The folder '$FOLDER_PATH' was not found, please check the name."
+if [ "$EUID" = 0 ]; then
+    printf "$DONT_RUN_AS_ROOT_MESSAGE" & exit
 fi
+
+checkCustomFolder "$1"
