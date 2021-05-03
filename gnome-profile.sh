@@ -1,15 +1,15 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.4"
+SCRIPT_VERSION="1.5"
 SCRIPT_NAME="Gnome Profile"
 
-HELP_MESSAGE="\n%s %s, an Archlinux Terminal Profile Utility\nUsage: gnome-profile [Options]... [Custom Path]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -I, --import\t\tImport profile from file.\n -E, --export\t\tExport profile to file. (Default)\n\n"
+HELP_MESSAGE="\n%s %s, an Archlinux Terminal Profile Utility\nUsage: gnome-profile [Options]... [Custom Path]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -I, --import\t\t\tImport profile from file.\n -E, --export\t\t\tExport profile to file. (Default)\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
-PROFILE_EXPORTED_SUCCESSFULLY_MESSAGE="Profile exported successfully.\n"
-PROFILE_IMPORTED_SUCCESSFULLY_MESSAGE="Profile imported successfully.\n"
-CUSTOM_FOLDER_NOT_FOUND_MESSAGE="Folder '%s' not found, aborting profile %s.\n"
+PROFILE_EXPORTED_SUCCESSFULLY_MESSAGE="Profile exported successfully\n"
+PROFILE_IMPORTED_SUCCESSFULLY_MESSAGE="Profile imported successfully\n"
+CUSTOM_FOLDER_NOT_FOUND_MESSAGE="Folder '%s' not found, aborting profile %s\n"
 
 IMPORT="import"
 EXPORT="export"
