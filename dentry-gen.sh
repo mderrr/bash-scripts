@@ -1,13 +1,11 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0"
+SCRIPT_VERSION="2.1"
 SCRIPT_NAME="Dentry Generator"
 
-HELP_MESSAGE="\n%s %s, a .desktop File Generator\nUsage: dentry-gen [Options]... [Executable Path]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
+HELP_MESSAGE="\n%s %s, a .desktop File Generator\nUsage: dentry-gen [Options]... [Executable Path]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -v, --verbose\t\t\tPrompt all desktop entry options\n -I, --icon\t\t\tSpecify an icon for the desktop entry\n -u, --uninstall\t\tUninstall a previously installed desktop entry\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
-
-FILE_NOT_FOUND_MESSAGE="Error: The specified executable file path could not be found."
 
 LOCAL_SHARED_FOLDER_PATH="/home/$USER/.local/share"
 ROOT_SHARED_FOLDER_PATH="/usr/share"
@@ -16,25 +14,20 @@ SHARED_FOLDER_PATH=""
 DESKTOP_ENTRY_DESTINATION_FOLDER="applications"
 
 APPLICATION_FOLDER_ALREADY_EXISTS_PROMPT="A folder for this file already exists, Override this directory? (y/N): "
-ENTRY_CREATION_ABORTED_MESSAGE="Entry Creation Aborted.\n"
+ENTRY_CREATION_ABORTED_MESSAGE="Entry Creation Aborted\n"
 OVERRIDING_APPLICATION_FOLDER_MESSAGE="Overriding folder\n"
-
 EXECUTABLE_PATH_NOT_FOUND_MESSAGE="The file '%s' was not found, aborting\n"
-
 DESKTOP_ENTRY_GENERATED_SUCCESSFULLY_MESSAGE="The desktop entry was generated successfully\n"
 ENTRY_UNINSTALL_ABORTED_MESSAGE="Aborting uninstall\n"
-
 UNISTALL_DIRECTORY_NOT_FOUND_MESSAGE="The directory for %s could not be found, aborting unistall\n"
 UNISTALL_DESKTOP_FILE_NOT_FOUND_MESSAGE="The desktop file for %s could not be found, aborting unistall\n"
+INPUT_NOT_VALID_MESSAGE="%s is not a valid option, aborting\n"
+INVALID_DESKTOP_ENTRY_ARGUMENT_MESSAGE="The specified argument is not valid, valid types are: %s\nAborting entry creation\n"
 
 CONFIRM_UNINSTALLATION_PROMPT="Are you sure you want to remove the %s desktop entry? (Y/n): "
 
-INPUT_NOT_VALID_MESSAGE="%s is not a valid option, aborting\n"
-
 VALID_DESKTOP_ENTRY_TYPES=("Application" "Link" "FSDevice" "MimeType" "Directory" "Service" "ServiceType")
 VALID_DESKTOP_ENTRY_TERMINAL=("true" "false")
-
-INVALID_DESKTOP_ENTRY_ARGUMENT_MESSAGE="The specified argument is not valid, valid types are: %s\nAborting entry creation\n"
 
 DESKTOP_ENTRY_ARGUMENT_HEADER="[Desktop Entry Arguments]\n"
 DESKTOP_ENTRY_TYPE_TITLE="Type="
@@ -241,7 +234,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-I | --icon) generateEntry "$3" "$2" && exit ;;
 
-		-u) uninstallEntry ${*:2} && exit ;;
+		-u | --uninstall) uninstallEntry ${*:2} && exit ;;
 
         -*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
