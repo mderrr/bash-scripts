@@ -1,24 +1,24 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.8"
+SCRIPT_VERSION="1.9"
 SCRIPT_NAME="TAUR"
 
-HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -I, --install\t\t\tInstall the specified package (Default Option).\n -u, --update\t\t\tFind updates for installed packages.\n -Iu, --install-updates\t\tFind and Install updates for installed packages.\n -Q, --query\t\t\tSearch installed packages.\n\n"
+HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -I, --install\t\t\tInstall the specified package (Default Option)\n -u, --update\t\t\tFind updates for installed packages\n -Iu, --install-updates\t\tFind and Install updates for installed packages\n -Q, --query\t\t\tSearch installed packages\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
 REMOVING_DIR_MESSAGE="Cleaning up...\n"
 REPOSITORY_DIRECTORY_NOT_FOUND_MESSAGE="Repository folder not found, creating one in '~/Repositories/'\n"
 INSTALLING_PACKAGE_MESSAGE="Installing package: %s...\n"
-SUCCESSFULLY_INSTALLED_MESSAGE="AUR package: %s was installed successfully.\n"
+SUCCESSFULLY_INSTALLED_MESSAGE="AUR package: %s was installed successfully\n"
 INSTALLING_UPDATED_PACKAGES_MESSAGE="Installing updated packages...\n"
-UPDATED_PACKAGE_NOT_FOUND_MESSAGE="Package: '%s' not found in out-dated packages list, skipping installation.\n"
-OUTDATED_PACKAGES_FOUND_MESSAGE="\nFound one or more packages that are out-dated, run 'taur -CI' to install all updates, or specify a list of packages to update.\n"
-ALL_PACKAGES_UPDATED_MESSAGE="\nAll packages are up-to-date with the Arch User Repository.\n"
+UPDATED_PACKAGE_NOT_FOUND_MESSAGE="Package: '%s' not found in out-dated packages list, skipping installation\n"
+OUTDATED_PACKAGES_FOUND_MESSAGE="\nFound one or more packages that are out-dated, run 'taur -CI' to install all updates, or specify a list of packages to update\n"
+ALL_PACKAGES_UPDATED_MESSAGE="\nAll packages are up-to-date with the Arch User Repository\n"
 NO_MATCHING_PACKAGES_FOUND_MESSAGE="No matching packages found\n"
-CONNECTION_NOT_FOUND_MESSAGE="Could not connect to the AUR, please try again.\n"
+CONNECTION_NOT_FOUND_MESSAGE="Could not connect to the AUR, please try again\n"
 INSTALLED_PACKAGES_MESSAGE="Installed packages:\n\n"
-NO_LINK_PROVIDED_MESSAGE="No link provided, aborting installation.\n"
+NO_LINK_PROVIDED_MESSAGE="No link provided, aborting installation\n"
 
 CONFIG_FILE_PACKAGE_HEADER="[Package]\t\t\t\t\t\t[Version]\n"
 
