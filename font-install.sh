@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6"
+SCRIPT_VERSION="1.7"
 SCRIPT_NAME="Font Install"
 
 HELP_MESSAGE="\n%s %s, an Archlinux Automatic Font Installer \nUsage: font-installer [Options]... [Fonts Folder]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -F, --format\t\t\tSpecify a file format for the font files\n\n"
@@ -8,11 +8,11 @@ VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
 FONT_INSTALLATION_FOLDER_NOT_FOUND_MESSAGE="The font installation folder was not found, creating one at '~/.local/share/fonts/%s'...\n"
-FONTS_INSTALLED_SUCCESSFULLY_MESSAGE="Fonts installed successfully.\n"
+FONTS_INSTALLED_SUCCESSFULLY_MESSAGE="Fonts installed successfully\n"
 DONT_RUN_AS_ROOT_MESSAGE="Do not run this script as root!\n"
 NO_DIRECTORY_SPECIFIED_MESSAGE="No directory specified with -d, defaulting to '~/Fonts'\n"
-NO_FILES_FOUND_IN_DIRECTORY_MESSAGE="No %s files found in %s, aborting installation.\n"
-SPECIFIED_FOLDER_NOT_FOUND_MESSAGE="The folder '%s' was not found, please check the name.\n"
+NO_FILES_FOUND_IN_DIRECTORY_MESSAGE="No %s files found in %s, aborting installation\n"
+SPECIFIED_FOLDER_NOT_FOUND_MESSAGE="The folder '%s' was not found, please check the name\n"
 
 FILE_FORMAT=".ttf"
 
