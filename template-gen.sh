@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5"
+SCRIPT_VERSION="1.6"
 SCRIPT_NAME="Template Gen"
 
 HELP_MESSAGE="\n%s %s, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n -q, --quiet\t\tNo prompts, use defaults.\n\n"
@@ -41,6 +41,8 @@ function writeFile() {
     printf "\tesac\n\n" >> $file_path
     printf "\tshift\n" >> $file_path
     printf "done" >> $file_path
+
+    chmod +x "$file_path"
 }
 
 function createFile() {
