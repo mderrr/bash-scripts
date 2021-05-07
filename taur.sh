@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.9"
+SCRIPT_VERSION="2.0"
 SCRIPT_NAME="TAUR"
 
 HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -I, --install\t\t\tInstall the specified package (Default Option)\n -u, --update\t\t\tFind updates for installed packages\n -Iu, --install-updates\t\tFind and Install updates for installed packages\n -Q, --query\t\t\tSearch installed packages\n\n"
@@ -122,7 +122,7 @@ function saveNewPackage() {
 	deleteCoincidences "$package_name"
 	tabbed_string=$(getTabbedString $package_name $current_version)
 
-	printf "$tabbed_string" >> $CONFIG_FILE_PATH
+	printf "$tabbed_string\n" >> $CONFIG_FILE_PATH
 }
 
 function installPackage() {
@@ -153,10 +153,8 @@ function checkIfIsUpdated() {
 	local lastest_version=$(fetchCurrentVersion $package_name)
 	
 	if [[ $current_version != $lastest_version ]]; then
-		printf "$CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE" "$package_name" > /dev/tty
 		echo false
 	else
-		printf "$CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE" "$package_name" > /dev/tty
 		echo true
 	fi
 }
@@ -200,13 +198,16 @@ function checkUpdates() {
 
 	printf "$INSTALLED_PACKAGES_MESSAGE"
 
-	for ((i = 2 ; i < $number_of_lines + 1 ; i++)); do
+	for ((i = 2 ; i < $number_of_lines + 0 ; i++)); do
 		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
 		local version=($current_line) && version=${version[-1]}
 		local package_name=${current_line%$version}
 
 		if [[ $(checkIfIsUpdated "$package_name" "$version") == false ]]; then
+			printf "$CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE" "$package_name"
 			outdated_packages=("${outdated_packages[@]}" "$package_name")
+		else
+			printf "$CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE" "$package_name" > /dev/tty
 		fi
 
 	done
@@ -222,6 +223,30 @@ function checkUpdates() {
 	else
 		printf "$ALL_PACKAGES_UPDATED_MESSAGE"
 	fi
+}
+
+function getNumberOfUpdates() {
+	local install_updates="${1:-false}"
+	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
+	local isConnected=$(checkForConnection)
+	local outdated_packages=()
+
+	if [[ $isConnected -ne 0 ]]; then
+		printf "$CONNECTION_NOT_FOUND_MESSAGE" & exit
+	fi
+
+	for ((i = 2 ; i < $number_of_lines + 0 ; i++)); do
+		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
+		local version=($current_line) && version=${version[-1]}
+		local package_name=${current_line%$version}
+
+		if [[ $(checkIfIsUpdated "$package_name" "$version") == false ]]; then
+			outdated_packages=("${outdated_packages[@]}" "$package_name")
+		fi
+
+	done
+
+	echo ${#outdated_packages[@]} 
 }
 
 function displayQueryResults() {
@@ -264,7 +289,9 @@ while [[ "$1" =~ ^- ]]; do
 
 		-I | --install) installPackage $2 && exit ;;
 
-		-u | --update) checkUpdates false "${*:2}" && exit ;;
+		-u | --update) checkUpdates false && exit ;;
+
+		-Nu | --number-of-updates) getNumberOfUpdates && exit ;;
 
 		-Iu | --install-updates) checkUpdates true "${*:2}" && exit ;;
 
