@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7"
+SCRIPT_VERSION="1.8"
 SCRIPT_NAME="Font Install"
 
 HELP_MESSAGE="\n%s %s, an Archlinux Automatic Font Installer \nUsage: font-installer [Options]... [Fonts Folder]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -F, --format\t\t\tSpecify a file format for the font files\n\n"
@@ -16,7 +16,7 @@ SPECIFIED_FOLDER_NOT_FOUND_MESSAGE="The folder '%s' was not found, please check 
 
 FILE_FORMAT=".ttf"
 
-FOLDER_PATH="/home/$USER/Fonts/"
+FOLDER_PATH="/home/$USER/Fonts"
 FONT_INSTALLATION_PATH="/home/$USER/.local/share/fonts"
 
 function installFonts() {
