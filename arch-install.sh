@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Arch Install"
-SCRIPT_VERSION="2.1"
+SCRIPT_VERSION="2.2"
 
 HELP_MESSAGE="\n%s %s, an Archlinux Installer\nUsage: arch-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
@@ -111,9 +111,9 @@ function main() {
 	printf "LANG=en_US.UTF-8" > /etc/locale.conf
 	printf "KEYMAP=la-latin1" > /etc/vconsole.conf
 	printf "arch-linux" > /etc/hostname
-	printf "127.0.0.1\tlocalhost\n" >> hosts
-	printf "::1\t\tlocalhost\n" >> hosts
-	printf "127.0.1.1\tarch-linux.localdomain\tarch-linux" >> hosts
+	printf "127.0.0.1\tlocalhost\n" >> /etc/hosts
+	printf "::1\t\tlocalhost\n" >> /etc/hosts
+	printf "127.0.1.1\tarch-linux.localdomain\tarch-linux" >> /etc/hosts
 	printf "$password_string" | passwd
 	useradd -m $user_name
 	printf "$password_string" | passwd $user_name
