@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0"
+SCRIPT_VERSION="2.1"
 SCRIPT_NAME="TAUR"
 
 HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -I, --install\t\t\tInstall the specified package (Default Option)\n -u, --update\t\t\tFind updates for installed packages\n -Iu, --install-updates\t\tFind and Install updates for installed packages\n -Q, --query\t\t\tSearch installed packages\n\n"
@@ -48,7 +48,7 @@ function removeDir() {
 	local directory=$1
 	printf "$REMOVING_DIR_MESSAGE"
 
-	rm -r -f directory
+	rm -r -f $directory
 }
 
 function checkRepoDir() {
