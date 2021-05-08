@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1"
+SCRIPT_VERSION="2.3"
 SCRIPT_NAME="TAUR"
 
 HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -I, --install\t\t\tInstall the specified package (Default Option)\n -u, --update\t\t\tFind updates for installed packages\n -Iu, --install-updates\t\tFind and Install updates for installed packages\n -Q, --query\t\t\tSearch installed packages\n\n"
@@ -32,6 +32,8 @@ CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE=" %s [ OK ]\n"
 QUERY_RESULT_TEMPLATE="%s\n"
 
 REPOSITORIES_DIRECTORY="/home/$USER/Repositories/"
+
+HTTPS_FORMAT="https://"
 
 sedStartLine() { sed -n '/<div id="pkgdetails" class="box">/,$p'; }
 sedEndLine() { sed -n '/<div id="detailslinks" class="listing">/q;p'; }
@@ -125,15 +127,27 @@ function saveNewPackage() {
 	printf "$tabbed_string\n" >> $CONFIG_FILE_PATH
 }
 
+function formatInputArgument() {
+	local input_argument=$1
+
+	if ! [[ $input_argument =~ "$HTTPS_FORMAT" ]]; then
+		input_argument="https://aur.archlinux.org/${input_argument}.git"
+	fi
+
+	echo $input_argument
+}
+
 function installPackage() {
-	local package_link=$1
+	if [[ -z "$1" ]]; then
+		printf "$NO_LINK_PROVIDED_MESSAGE" & exit
+	else
+		local package_link=$(formatInputArgument "$1")
+	fi
+
 	local package_name=${package_link##*.org/} && package_name=${package_name%.git*}
 	local git_directory=$REPOSITORIES_DIRECTORY$package_name
 
-	if [[ -z "$package_link" ]]; then
-		printf "$NO_LINK_PROVIDED_MESSAGE"
-		exit
-	fi
+	
 
 	printf "$INSTALLING_PACKAGE_MESSAGE" "$package_name" 
 
@@ -254,7 +268,7 @@ function displayQueryResults() {
 	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
 	local query_results=()
 
-	for ((i = 2 ; i < $number_of_lines + 1 ; i++)); do
+	for ((i = 2 ; i < $number_of_lines + 0 ; i++)); do
 		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
 		local version=($current_line) && version=${version[-1]}
 		local package_name=${current_line%$version} && package_name=${package_name//[[:blank:]]/}

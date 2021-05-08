@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Export Scripts"
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 HELP_MESSAGE="\n%s %s, a Bash Script Exporter\nUsage: export-scripts [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -9,6 +9,10 @@ OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
 SYNCING_REPOSITORY_MESSAGE="Syncing the scripts repository\t\t[ .... ]"
 SYNC_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
+
+UPDATING_REPOSITORY_MESSAGE="Updating the scripts repository\t\t[ .... ]"
+UPDATE_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
+
 
 USER_NAME=$USER
 SCRIPTS_DESTINATION_DIRECTORY="/home/$USER_NAME/.scripts/"
@@ -28,17 +32,18 @@ function checkScriptsDirectory() {
 function exportScripts() {
 	checkScriptsDirectory
 
+	printf "$UPDATING_REPOSITORY_MESSAGE"
     for script in $SCRIPTS_REPOSITORY*; do
         local script_name=${script##*/} 
 		local scripts_destination_path="${SCRIPTS_DESTINATION_DIRECTORY}$script_name"
         
         if ! [[ ${EXCLUDED_FILES_FROM_SCRIPTS[*]} =~ $script_name ]]; then
-            echo $script_name
-
 			cp $script $scripts_destination_path
 			chown -R "${USER_NAME}:${USER_NAME}" "$scripts_destination_path"
         fi
     done
+
+	printf "$UPDATE_COMPLETE_MESSAGE"
 }
 
 function syncRepository() {
