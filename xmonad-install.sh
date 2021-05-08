@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="1.6"
+SCRIPT_VERSION="1.7"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -29,7 +29,7 @@ function installXmonad() {
 }
 
 function installExtras() {
-	pacman -S --noconfirm firefox 
+	pacman -S --noconfirm firefox dmenu deja-dup nitrogen
 }
 
 function installPulseAudio() {
