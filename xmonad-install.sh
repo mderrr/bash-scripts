@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="2.1"
+SCRIPT_VERSION="2.2"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -62,6 +62,8 @@ function copyConfigFile() {
 
 function getConfigs() {
 	checkTempConfigDirectory
+
+	shopt -s dotglob # to include . files
 
 	for file in $TEMP_CONFIG_DIRECTORY*; do
 		local file_name=${file##*/}
@@ -130,6 +132,8 @@ function main() {
 	setKeymap
 
 	getConfigs
+
+	#reboot
 }
 
 while [[ "$1" =~ ^- ]]; do
