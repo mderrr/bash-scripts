@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SCRIPT_NAME="Export Configs"
-SCRIPT_VERSION="1.1"
-HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
+SCRIPT_VERSION="1.2"
+HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -S, --sync-repo\t\tSync the repository (git pull)\n -Su, --sync-update\t\tSync the repository and update destination directory\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
@@ -23,6 +23,9 @@ XMOBAR_CONFIG_DESTINATION_PATH="${DEFAULT_CONFIG_DIRECTORY}xmobar/"
 
 BASHRC_CONFIG=".bashrc"
 BASHRC_CONFIG_DESTINATION_PATH="/home/$USER/"
+
+SYNCING_REPOSITORY_MESSAGE="Syncing the scripts repository\t\t[ .... ]"
+SYNC_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
 
 UPDATING_CONFIGS_MESSAGE="Updating config files\t\t[ .... ]"
 UPDATE_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
@@ -75,12 +78,22 @@ function exportConfigs() {
 	printf "$UPDATE_COMPLETE_MESSAGE"
 }
 
+function syncRepository() {
+	printf "$SYNCING_REPOSITORY_MESSAGE"
+	cd $TEMP_CONFIG_DIRECTORY && git pull >> /dev/null
+	printf "$SYNC_COMPLETE_MESSAGE"
+}
+
 while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
 		-h | --help) printf "$HELP_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
 		-V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
+
+		-S | --sync-repo) syncRepository && exit ;;
+
+		-Su | --sync-update) syncRepository ;;
 
 		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
 
