@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPT_NAME="Get Configs"
-SCRIPT_VERSION="1.0"
-HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: get-configs [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
+SCRIPT_NAME="Export Configs"
+SCRIPT_VERSION="1.1"
+HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
@@ -23,6 +23,9 @@ XMOBAR_CONFIG_DESTINATION_PATH="${DEFAULT_CONFIG_DIRECTORY}xmobar/"
 
 BASHRC_CONFIG=".bashrc"
 BASHRC_CONFIG_DESTINATION_PATH="/home/$USER/"
+
+UPDATING_CONFIGS_MESSAGE="Updating config files\t\t[ .... ]"
+UPDATE_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
 
 function checkTempConfigDirectory() {
 	if ! [[ -d "$TEMP_CONFIG_DIRECTORY" ]]; then
@@ -50,12 +53,12 @@ function copyConfigFile() {
 	cp "$config_file_path" "$config_file_destination_path"
 }
 
-function getConfigs() {
+function exportConfigs() {
 	checkTempConfigDirectory
 
+	printf "$UPDATING_CONFIGS_MESSAGE"
 	for file in $TEMP_CONFIG_DIRECTORY*; do
 		local file_name=${file##*/}
-		echo "$file_name"
 
 		case "$file_name" in
 			$PICOM_CONFIG) copyConfigFile "$PICOM_CONFIG" "$PICOM_CONFIG_DESTINATION_PATH" ;;
@@ -65,11 +68,11 @@ function getConfigs() {
 			$XMOBAR_CONFIG) copyConfigFile "$XMOBAR_CONFIG" "$XMOBAR_CONFIG_DESTINATION_PATH" ;;
 
 			$BASHRC_CONFIG) copyConfigFile "$BASHRC_CONFIG" "$BASHRC_CONFIG_DESTINATION_PATH" ;;
-
-			*) echo "othr" ;;
 			
 		esac
 	done
+
+	printf "$UPDATE_COMPLETE_MESSAGE"
 }
 
 while [[ "$1" =~ ^- ]]; do
@@ -86,4 +89,4 @@ while [[ "$1" =~ ^- ]]; do
 	shift
 done
 
-getConfigs
+exportConfigs
