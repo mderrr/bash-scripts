@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Export Configs"
-SCRIPT_VERSION="1.2"
+SCRIPT_VERSION="1.4"
 HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -S, --sync-repo\t\tSync the repository (git pull)\n -Su, --sync-update\t\tSync the repository and update destination directory\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -24,16 +24,13 @@ XMOBAR_CONFIG_DESTINATION_PATH="${DEFAULT_CONFIG_DIRECTORY}xmobar/"
 BASHRC_CONFIG=".bashrc"
 BASHRC_CONFIG_DESTINATION_PATH="/home/$USER/"
 
-SYNCING_REPOSITORY_MESSAGE="Syncing the scripts repository\t\t[ .... ]"
-SYNC_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
-
-UPDATING_CONFIGS_MESSAGE="Updating config files\t\t[ .... ]"
+UPDATING_CONFIGS_MESSAGE="Updating config files\t\t\t[ .... ]"
 UPDATE_COMPLETE_MESSAGE="\r\t\t\t\t\t[ DONE ]\n"
 
 function checkTempConfigDirectory() {
 	if ! [[ -d "$TEMP_CONFIG_DIRECTORY" ]]; then
 		mkdir -p "$TEMP_CONFIG_DIRECTORY"
-		git clone "$CONFIG_FILES_REPOSITORY" "$TEMP_CONFIG_DIRECTORY"
+		git clone --quiet "$CONFIG_FILES_REPOSITORY" "$TEMP_CONFIG_DIRECTORY" > /dev/null
 	fi
 }
 
@@ -57,9 +54,10 @@ function copyConfigFile() {
 }
 
 function exportConfigs() {
+	printf "$UPDATING_CONFIGS_MESSAGE"
+
 	checkTempConfigDirectory
 
-	printf "$UPDATING_CONFIGS_MESSAGE"
 	for file in $TEMP_CONFIG_DIRECTORY*; do
 		local file_name=${file##*/}
 
@@ -75,13 +73,8 @@ function exportConfigs() {
 		esac
 	done
 
+	rm -d -r -f $TEMP_CONFIG_DIRECTORY
 	printf "$UPDATE_COMPLETE_MESSAGE"
-}
-
-function syncRepository() {
-	printf "$SYNCING_REPOSITORY_MESSAGE"
-	cd $TEMP_CONFIG_DIRECTORY && git pull >> /dev/null
-	printf "$SYNC_COMPLETE_MESSAGE"
 }
 
 while [[ "$1" =~ ^- ]]; do
@@ -90,10 +83,6 @@ while [[ "$1" =~ ^- ]]; do
 		-h | --help) printf "$HELP_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
 		-V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
-
-		-S | --sync-repo) syncRepository && exit ;;
-
-		-Su | --sync-update) syncRepository ;;
 
 		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
 
