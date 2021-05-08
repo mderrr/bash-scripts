@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="2.2"
+SCRIPT_VERSION="2.3"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -46,6 +46,7 @@ function checkDestinationDirectory() {
 
 	if ! [[ -d "$directory" ]]; then
 		mkdir -p "$directory"
+		chown -R "${USER_NAME}:users" "$directory"
 	fi
 }
 
@@ -58,6 +59,7 @@ function copyConfigFile() {
 	checkDestinationDirectory "$config_file_destination"
 
 	cp "$config_file_path" "$config_file_destination_path"
+	chown -R "${USER_NAME}:users" "$config_file_destination_path"
 }
 
 function getConfigs() {
