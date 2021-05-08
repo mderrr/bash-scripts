@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="1.8"
+SCRIPT_VERSION="1.9"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -81,7 +81,7 @@ function installXorg() {
 }
 
 function installNvidia() {
-	pacman -S nvidia nvidia-settings nvidia-utils
+	pacman -S --noconfirm nvidia nvidia-settings nvidia-utils
 }
 
 function installPrev() {
