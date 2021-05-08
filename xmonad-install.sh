@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="1.5"
+SCRIPT_VERSION="1.6"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -15,8 +15,12 @@ function installXorg() {
 	pacman -S --noconfirm xorg xorg-xinit
 }
 
+function installNvidia() {
+	pacman -S nvidia nvidia-settings nvidia-utils
+}
+
 function installPrev() {
-	pacman -S --noconfirm lightdm-gtk-greeter
+	pacman -S --noconfirm lightdm lightdm-gtk-greeter
 	systemctl enable lightdm
 }
 
@@ -40,7 +44,12 @@ function setKeymap() {
 }
 
 function main() {
+	local install_nvidia_drivers=${1:-true}
+
 	installXorg
+	if [[ $install_nvidia_drivers == true ]]; then
+		installNvidia
+	fi
 	installPrev
 	installXmonad
 	installExtras
