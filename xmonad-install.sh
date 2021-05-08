@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="3.0"
+SCRIPT_VERSION="3.1"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -53,6 +53,12 @@ function checkDestinationDirectory() {
 	fi
 }
 
+function checkScriptsDirectory() {
+	if ! [[ -d "$SCRIPTS_DIRECTORY" ]]; then
+		mkdir -p "$SCRIPTS_DIRECTORY"
+	fi
+}
+
 function copyConfigFile() {
 	local config_file=$1
 	local config_file_destination=$2
@@ -63,6 +69,7 @@ function copyConfigFile() {
 
 	cp "$config_file_path" "$config_file_destination_path"
 	chown -R "${USER_NAME}:${USER_NAME}" "$config_file_destination_path"
+	chown -R "${USER_NAME}:${USER_NAME}" "$config_file_destination"
 }
 
 function installFonts() {
