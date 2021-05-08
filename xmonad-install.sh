@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="2.0"
+SCRIPT_VERSION="2.1"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -21,6 +21,9 @@ CONFIG_FILES_REPOSITORY="https://github.com/shernandezz/arch-config-files"
 
 PICOM_CONFIG="picom.conf"
 PICOM_CONFIG_DESTINATION_PATH="${DEFAULT_CONFIG_DIRECTORY}picom/"
+
+XRESOURCES_CONFIG=".Xresources"
+XRESOURCES_CONFIG_DESTINATION_PATH="/home/$USER_NAME/"
 
 XMONAD_CONFIG="xmonad.hs"
 XMONAD_CONFIG_DESTINATION_PATH="/home/$USER_NAME/.xmonad/"
@@ -66,6 +69,8 @@ function getConfigs() {
 
 		case "$file_name" in
 			$PICOM_CONFIG) copyConfigFile "$PICOM_CONFIG" "$PICOM_CONFIG_DESTINATION_PATH" ;;
+
+			$XRESOURCES_CONFIG) copyConfigFile "$XRESOURCES_CONFIG" "$XRESOURCES_CONFIG_DESTINATION_PATH" ;;
 
 			$XMONAD_CONFIG) copyConfigFile "$XMONAD_CONFIG" "$XMONAD_CONFIG_DESTINATION_PATH" ;;
 
@@ -113,10 +118,11 @@ function setKeymap() {
 function main() {
 	local install_nvidia_drivers=${1:-true}
 
-	installXorg
 	if [[ $install_nvidia_drivers == true ]]; then
 		installNvidia
 	fi
+
+	installXorg
 	installPrev
 	installXmonad
 	installExtras
