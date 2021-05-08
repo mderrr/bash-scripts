@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="2.6"
+SCRIPT_VERSION="2.7"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -128,9 +128,9 @@ function installExtras() {
 }
 
 function installPulseAudio() {
-	pacman -S --noconfirm pulseaudio pavucontrol
+	pacman -S --noconfirm alsa-utils pulseaudio pulseaudio-alsa pavucontrol
 	pulseaudio --check
-	pulseaudio -D
+	su -c 'pulseaudio -D' $USER_NAME
 }
 
 function setKeymap() {
@@ -158,7 +158,7 @@ function main() {
 
 	getConfigs
 
-	#reboot
+	reboot
 }
 
 while [[ "$1" =~ ^- ]]; do
