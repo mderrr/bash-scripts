@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="1.2"
+SCRIPT_VERSION="1.3"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -12,23 +12,23 @@ KEYMAP="latam"
 LIGHTDM_XSESSION_FILE_PATH="/etc/lightdm/Xsession"
 
 function installXorg() {
-	pacman -S xorg xorg-xinit
+	pacman -S --noconfirm xorg xorg-xinit
 }
 
 function installPrev() {
-	pacman -S lightdm-gtk-greeter
+	pacman -S --noconfirm lightdm-gtk-greeter
 }
 
 function installXmonad() {
-	pacman -S xmonad xmonad-contrib xmobar
+	pacman -S --noconfirm xmonad xmonad-contrib xmobar
 }
 
 function installExtras() {
-	pacman -S firefox 
+	pacman -S --noconfirm firefox 
 }
 
 function installPulseAudio() {
-	pacman -S pulseaudio pavucontrol
+	pacman -S --noconfirm pulseaudio pavucontrol
 	pulseaudio --check
 	pulseaudio -D
 }
