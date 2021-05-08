@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="2.5"
+SCRIPT_VERSION="2.6"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -69,7 +69,7 @@ function installFonts() {
 	local fonts_destination=$1
 	local fonts_directory="${TEMP_CONFIG_DIRECTORY}fonts/"
 
-	checkDestinationDirectory "$fonts_directory"
+	checkDestinationDirectory "$fonts_destination"
 
 	for font in $fonts_directory*; do
 		cp $font $fonts_destination
@@ -158,7 +158,7 @@ function main() {
 
 	getConfigs
 
-	reboot
+	#reboot
 }
 
 while [[ "$1" =~ ^- ]]; do
