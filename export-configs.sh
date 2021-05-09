@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Export Configs"
-SCRIPT_VERSION="1.4"
+SCRIPT_VERSION="1.5"
 HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -S, --sync-repo\t\tSync the repository (git pull)\n -Su, --sync-update\t\tSync the repository and update destination directory\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -19,6 +19,8 @@ XMONAD_CONFIG="xmonad.hs"
 XMONAD_CONFIG_DESTINATION_PATH="/home/$USER/.xmonad/"
 
 XMOBAR_CONFIG="xmobarrc"
+XMOBAR_TV_CONFIG="xmobarrc-tv"
+XMOBAR_PORTRAIT_CONFIG="xmobarrc-portrait"
 XMOBAR_CONFIG_DESTINATION_PATH="${DEFAULT_CONFIG_DIRECTORY}xmobar/"
 
 BASHRC_CONFIG=".bashrc"
@@ -66,7 +68,7 @@ function exportConfigs() {
 
 			$XMONAD_CONFIG) copyConfigFile "$XMONAD_CONFIG" "$XMONAD_CONFIG_DESTINATION_PATH" ;;
 
-			$XMOBAR_CONFIG) copyConfigFile "$XMOBAR_CONFIG" "$XMOBAR_CONFIG_DESTINATION_PATH" ;;
+			$XMOBAR_CONFIG | $XMOBAR_TV_CONFIG | $XMOBAR_PORTRAIT_CONFIG) copyConfigFile "$file_name" "$XMOBAR_CONFIG_DESTINATION_PATH" ;;
 
 			$BASHRC_CONFIG) copyConfigFile "$BASHRC_CONFIG" "$BASHRC_CONFIG_DESTINATION_PATH" ;;
 			
