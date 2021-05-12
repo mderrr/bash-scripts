@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Arch Install"
-SCRIPT_VERSION="2.3"
+SCRIPT_VERSION="2.4"
 
 HELP_MESSAGE="\n%s %s, an Archlinux Installer\nUsage: arch-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
@@ -16,13 +16,14 @@ AVAILABLE_DISKS_FOR_INSTALLATION_MESSAGE="\nAvailable disk for installation:\n"
 
 USERNAME_PROMPT_MESSAGE="Enter the username for the main user (empty for default): "
 PASSWORD_PROMPT_MESSAGE="Enter the password for root and main user: "
-PASSWORD_REENTER_PROMPT_MESSAGE="\nRe-enter the password: "
+PASSWORD_REENTER_PROMPT_MESSAGE="Re-enter the password: "
 SELECT_DISK_PROMPT_MESSAGE="\nType in a disk to install Arch (type 'd' for details): "
 SELECT_DISK_NO_DETAILS_PROMPT_MESSAGE="\nType in a disk to install Arch: "
 
 PASSWORDS_NOT_EQUAL_MESSAGE="The passwords do not coincide, installation aborted\n"
 
 DETAIL_CHAR="d"
+NEWLINE="\n"
 
 DEFAULT_USERNAME="santiago"
 
@@ -71,6 +72,7 @@ function main() {
 	user_name=${user_name:-"$DEFAULT_USERNAME"}
 
 	read -s -p "$PASSWORD_PROMPT_MESSAGE" password
+	printf "$NEWLINE"
 	read -s -p "$PASSWORD_REENTER_PROMPT_MESSAGE" password_reentered
 	local password_string="${password}\n${password}"
 	if ! [[ $password == $password_reentered ]]; then
