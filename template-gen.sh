@@ -1,15 +1,16 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.8"
+SCRIPT_VERSION="1.9"
 SCRIPT_NAME="Template Gen"
 
-HELP_MESSAGE="\n%s %s, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -q, --quiet\t\t\tNo prompts, use defaults.\n\n"
+HELP_MESSAGE="\n%s %s, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tNo prompts, use defaults\n -v, --verbose\t\t\tAsk for all the script details\n -d, --directory\t\tSpecify a directory to place the script in\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
 SCRIPT_DESCRIPTION_PROMPT_MESSAGE="Script description: "
 SCRIPT_VERSION_PROMPT_MESSAGE="Script version: "
 SCRIPT_USAGE_PROMPT_MESSAGE="Script usage placeholder action: "
+EMPTY_SCRIPT_NAME_MESSAGE="No name was provided for the script, aborting creation\n"
 
 DEFAULT_FILE_PATH="."
 DEFAULT_SCRIPT_DESCRIPTION="a Bash Script"
@@ -53,6 +54,10 @@ function createFile() {
     local script_description=""
     local script_version=""
     local script_usage_action=""
+
+    if [[ -z $script_name ]]; then
+        printf "$EMPTY_SCRIPT_NAME_MESSAGE" & exit
+    fi
 
     if [[ ! $QUIET_MODE_ENABLED == true ]]; then
         printf "$SCRIPT_DESCRIPTION_PROMPT_MESSAGE"

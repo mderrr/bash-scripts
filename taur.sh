@@ -240,7 +240,7 @@ function checkUpdates() {
 }
 
 function getNumberOfUpdates() {
-	local install_updates="${1:-false}"
+	local return_list="${1:-false}"
 	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
 	local isConnected=$(checkForConnection)
 	local outdated_packages=()
@@ -260,7 +260,11 @@ function getNumberOfUpdates() {
 
 	done
 
-	echo ${#outdated_packages[@]} 
+	if [[ $return_list == true ]]; then
+		echo ${outdated_packages[@]}
+	else
+		echo ${#outdated_packages[@]}
+	fi
 }
 
 function displayQueryResults() {
@@ -306,6 +310,8 @@ while [[ "$1" =~ ^- ]]; do
 		-u | --update) checkUpdates false && exit ;;
 
 		-Nu | --number-of-updates) getNumberOfUpdates && exit ;;
+
+		-Lu | --list-updates) getNumberOfUpdates true && exit ;;
 
 		-Iu | --install-updates) checkUpdates true "${*:2}" && exit ;;
 
