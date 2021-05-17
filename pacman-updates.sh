@@ -39,14 +39,8 @@ function calculateLastSyncronization() {
 }
 
 function syncronizeRepos() {
-    checkConfigFile
-
-    local syncronize=$(calculateLastSyncronization)
-
-    if [[ $syncronize == true ]]; then
-        passwd=$(/home/$USER/.scripts/pass.sh) &> /dev/null
-        echo "$passwd" | sudo -S -k pacman -Sy &> /dev/null
-    fi
+    passwd=$(/home/$USER/.scripts/pass.sh) &> /dev/null
+    echo "$passwd" | sudo -S -k pacman -Sy &> /dev/null
 }
 
 function getNumberOfUpdates() {
@@ -60,7 +54,7 @@ function getNumberOfUpdates() {
 function getUpdatesList() {
     syncronizeRepos
 
-    local pacman_qu=( $(pacman -Qu) ) #| sed 's/:.*//') )
+    local pacman_qu=( $(pacman -Qu) )
     local updates_list=()
 
     for ((i = 0 ; i < ${#pacman_qu[@]} ; i++)); do

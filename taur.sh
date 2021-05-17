@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.4"
+SCRIPT_VERSION="3.0"
 SCRIPT_NAME="TAUR"
 
 HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -I, --install\t\t\tInstall the specified package (Default Option)\n -u, --update\t\t\tFind updates for installed packages\n -Iu, --install-updates\t\tFind and Install updates for installed packages\n -Q, --query\t\t\tSearch installed packages\n\n"
@@ -19,11 +19,17 @@ NO_MATCHING_PACKAGES_FOUND_MESSAGE="No matching packages found\n"
 CONNECTION_NOT_FOUND_MESSAGE="Could not connect to the AUR, please try again\n"
 INSTALLED_PACKAGES_MESSAGE="Installed packages:\n\n"
 NO_LINK_PROVIDED_MESSAGE="No link provided, aborting installation\n"
+SYNCING_AUR_PACKAGES_MESSAGE="Synchronizing AUR package databases...\n"
+SYNCING_AUR_PACKAGES_DONE_MESSAGE="AUR package database is up to date\n"
 
 CONFIG_FILE_PACKAGE_HEADER="[Package]\t\t\t\t\t\t[Version]\n"
 
-CONFIG_FILE_PATH="/home/$USER/.config/taur/taur.conf"
-CONFIG_DIR_PATH=${CONFIG_FILE_PATH%/*}
+CONFIG_DIR_PATH=$"/home/$USER/.config/taur/"
+
+CONFIG_FILE_PATH="${CONFIG_DIR_PATH}taur.conf"
+
+INSTALLED_PACKAGES_FILE_PATH="${CONFIG_DIR_PATH}installed-packages"
+OUTDATED_PACKAGES_FILE_PATH="${CONFIG_DIR_PATH}outdated-packages"
 
 NEWLINE="\n"
 
@@ -34,6 +40,8 @@ QUERY_RESULT_TEMPLATE="%s\n"
 REPOSITORIES_DIRECTORY="/home/$USER/Repositories/"
 
 HTTPS_FORMAT="https://"
+
+QUIET_MODE_ENABLED=1
 
 sedStartLine() { sed -n '/<div id="pkgdetails" class="box">/,$p'; }
 sedEndLine() { sed -n '/<div id="detailslinks" class="listing">/q;p'; }
@@ -66,13 +74,25 @@ function createConfigFile() {
 	printf "$CONFIG_FILE_PACKAGE_HEADER" > $CONFIG_FILE_PATH
 }
 
+function createInstalledPackagesFile() {
+	printf "" > $INSTALLED_PACKAGES_FILE_PATH
+}
+
+function createOutdatedPackagesFile() {
+	printf "" > $OUTDATED_PACKAGES_FILE_PATH
+}
+
 function checkConfigFile() {
 	if [[ ! -d $CONFIG_DIR_PATH ]]; then
 		mkdir $CONFIG_DIR_PATH
 	fi
 
-	if [[ ! -e $CONFIG_FILE_PATH ]]; then
-		createConfigFile 
+	if [[ ! -e $INSTALLED_PACKAGES_FILE_PATH ]]; then
+		createInstalledPackagesFile 
+	fi
+
+	if [[ ! -e $OUTDATED_PACKAGES_FILE_PATH ]]; then
+		createOutdatedPackagesFile 
 	fi
 }
 
@@ -100,20 +120,19 @@ function getTabbedString() {
 
 function deleteCoincidences() {
 	local package_name=$1
-	local package_found=$(grep -Fxq "$package_name" $CONFIG_FILE_PATH)
+	local package_found=$(grep -Fxq "$package_name" $INSTALLED_PACKAGES_FILE_PATH)
 
 	if [[ package_found ]]; then
-		sed -i -e "s/^$package_name.*$//g" $CONFIG_FILE_PATH && sed -i "/^$/d" $CONFIG_FILE_PATH
+		sed -i -e "s/^$package_name.*$//g" $INSTALLED_PACKAGES_FILE_PATH && sed -i "/^$/d" $INSTALLED_PACKAGES_FILE_PATH
 	fi
 }
 
 function fetchCurrentVersion() {
 	local package_name=$1
-	local lastest_version=$(curl https://aur.archlinux.org/packages/$package_name/ --silent | sedStartLine | sedEndLine | tail -n+2)
+	local package_pkgver=$(curl -s "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=${package_name}" | sed -n '/^pkgver=/p') && package_pkgver=${package_pkgver:7}
+	local package_pkgrel=$(curl -s "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=${package_name}" | sed -n '/^pkgrel=/p') && package_pkgrel=${package_pkgrel:7}
+	local lastest_version="${package_pkgver}-${package_pkgrel}"
 
-    lastest_version=${lastest_version#*"<h2>Package Details: $package_name"}
-    lastest_version=${lastest_version%"</h2>"}
-    
     echo $lastest_version
 }
 
@@ -122,9 +141,17 @@ function saveNewPackage() {
 	local current_version="$(fetchCurrentVersion $package_name)"
 	
 	deleteCoincidences "$package_name"
-	tabbed_string=$(getTabbedString $package_name $current_version)
 
-	printf "$tabbed_string\n" >> $CONFIG_FILE_PATH
+	printf "${package_name} ${current_version}\n" >> $INSTALLED_PACKAGES_FILE_PATH
+}
+
+function markUpdated() {
+	local package_name=$1
+	local package_found=$(grep -Fxq "$package_name" $OUTDATED_PACKAGES_FILE_PATH)
+
+	if [[ package_found ]]; then
+		sed -i -e "s/^$package_name.*$//g" $OUTDATED_PACKAGES_FILE_PATH && sed -i "/^$/d" $OUTDATED_PACKAGES_FILE_PATH
+	fi
 }
 
 function formatInputArgument() {
@@ -157,6 +184,7 @@ function installPackage() {
 	removeDir "$git_directory"
 
 	saveNewPackage "$package_name"
+	markUpdated "$package_name"
 
 	printf "$SUCCESSFULLY_INSTALLED_MESSAGE" "$package_name" 
 }
@@ -199,91 +227,80 @@ function checkForConnection() {
 	echo $?
 }
 
-function checkUpdates() {
-	local install_updates="${1:-false}"
-	local packages_to_update="$2"
-	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
-	local isConnected=$(checkForConnection)
-	local outdated_packages=()
-
-	if [[ $isConnected -ne 0 ]]; then
+function syncAurPackages() {
+	if [[ $(checkForConnection) -ne 0 ]]; then
 		printf "$CONNECTION_NOT_FOUND_MESSAGE" & exit
 	fi
 
-	printf "$INSTALLED_PACKAGES_MESSAGE"
+	local number_of_lines=$(wc -l < $INSTALLED_PACKAGES_FILE_PATH) 
 
-	for ((i = 2 ; i < $number_of_lines + 0 ; i++)); do
-		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
+	if [[ $QUIET_MODE_ENABLED != 0 ]]; then
+		printf "$SYNCING_AUR_PACKAGES_MESSAGE"
+	fi
+
+	for ((i = 1 ; i < $number_of_lines + 1 ; i++)); do
+		local current_line=$(sed "${i}q;d" $INSTALLED_PACKAGES_FILE_PATH)
 		local version=($current_line) && version=${version[-1]}
-		local package_name=${current_line%$version}
+		local package_name=${current_line% $version}
+		local latest_version=$(fetchCurrentVersion "$package_name")
 
-		if [[ $(checkIfIsUpdated "$package_name" "$version") == false ]]; then
-			printf "$CONFIG_FILE_OUTDATED_PACKAGE_TEMPLATE" "$package_name"
-			outdated_packages=("${outdated_packages[@]}" "$package_name")
-		else
-			printf "$CONFIG_FILE_UPTODATE_PACKAGE_TEMPLATE" "$package_name" > /dev/tty
+		if [[ $version != $latest_version ]]; then
+			printf "%s\n" "$package_name" > "$OUTDATED_PACKAGES_FILE_PATH"
 		fi
 
 	done
 
-	if [[ "${outdated_packages[@]}" > 0 ]]; then
-		if [[ "$install_updates" == true ]]; then
-			installUpdates "$outdated_packages" "$packages_to_update"
-
-		else
-			printf "$OUTDATED_PACKAGES_FOUND_MESSAGE"
-		fi
-
-	else
-		printf "$ALL_PACKAGES_UPDATED_MESSAGE"
+	if [[ $QUIET_MODE_ENABLED != 0 ]]; then
+		printf "$SYNCING_AUR_PACKAGES_DONE_MESSAGE"
 	fi
 }
 
-function getNumberOfUpdates() {
+function getAvailableUpdates() {
 	local return_list="${1:-false}"
-	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
-	local isConnected=$(checkForConnection)
-	local outdated_packages=()
+	local list_of_outdated_packages=()
 
-	if [[ $isConnected -ne 0 ]]; then
-		printf "$CONNECTION_NOT_FOUND_MESSAGE" & exit
-	fi
-
-	for ((i = 2 ; i < $number_of_lines + 0 ; i++)); do
-		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
-		local version=($current_line) && version=${version[-1]}
-		local package_name=${current_line%$version}
-
-		if [[ $(checkIfIsUpdated "$package_name" "$version") == false ]]; then
-			outdated_packages=("${outdated_packages[@]}" "$package_name")
-		fi
-
-	done
+	while read line; do
+		list_of_outdated_packages+=("$line")
+	done < $OUTDATED_PACKAGES_FILE_PATH
 
 	if [[ $return_list == true ]]; then
-		echo ${outdated_packages[@]}
+		echo ${list_of_outdated_packages[@]}
 	else
-		echo ${#outdated_packages[@]}
+		echo ${#list_of_outdated_packages[@]}
+	fi
+}
+
+function syncDatabasesAndUpdate() {
+	syncAurPackages
+
+	local number_of_available_updates=$(getAvailableUpdates)
+
+	if [[ $number_of_available_updates > 0 ]]; then
+
+		for ((i = 1 ; i < $number_of_available_updates + 1 ; i++)); do
+			local current_line=$(sed "${i}q;d" $OUTDATED_PACKAGES_FILE_PATH)
+			local version=($current_line) && version=${version[-1]}
+			local package_name=${current_line% $version}
+
+			installPackage "$package_name"
+		done
 	fi
 }
 
 function displayQueryResults() {
 	local filter=${1,,}
-	local number_of_lines=$(wc -l $CONFIG_FILE_PATH) && number_of_lines=${number_of_lines%"$CONFIG_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
+	local number_of_lines=$(wc -l $INSTALLED_PACKAGES_FILE_PATH) && number_of_lines=${number_of_lines%"$INSTALLED_PACKAGES_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
 	local query_results=()
 
-	for ((i = 2 ; i < $number_of_lines + 0 ; i++)); do
-		local current_line=$(sed -n "$i p" $CONFIG_FILE_PATH)
-		local version=($current_line) && version=${version[-1]}
-		local package_name=${current_line%$version} && package_name=${package_name//[[:blank:]]/}
-		local query_result="$package_name $version"
+	for ((i = 1 ; i < $number_of_lines ; i++)); do
+		local current_line=$(sed "${i}q;d" $INSTALLED_PACKAGES_FILE_PATH)
 
 		if [[ -z $filter ]]; then
-			query_results=("${query_results[@]}" "$query_result")
+			query_results=("${query_results[@]}" "$current_line")
 		
 		else
-			if [[ "$package_name" == *"$filter"* ]]; then
-				query_results=("${query_results[@]}" "$query_result")
+			if [[ "$query_result" == *"$filter"* ]]; then
+				query_results=("${query_results[@]}" "$current_line")
 			fi
 		fi	
 		
@@ -305,13 +322,21 @@ while [[ "$1" =~ ^- ]]; do
         
         -V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
-		-I | --install) installPackage $2 && exit ;;
+		-q | --quiet) QUIET_MODE_ENABLED=0 && shift && continue ;;
 
-		-u | --update) checkUpdates false && exit ;;
+		-S | --sync-package) installPackage $2 && exit ;;
 
-		-Nu | --number-of-updates) getNumberOfUpdates && exit ;;
+		-Sy | --sync-databases) syncAurPackages && exit ;;
 
-		-Lu | --list-updates) getNumberOfUpdates true && exit ;;
+		-Syu | --sync-and-update) syncDatabasesAndUpdate && exit ;;
+
+		-Nu | --number-of-updates) getAvailableUpdates false && exit ;;
+
+		-Synu) syncAurPackages && getAvailableUpdates false && exit ;;
+
+		-Lu | --list-updates) getAvailableUpdates true && exit ;;
+
+		-Sylu) syncAurPackages && getAvailableUpdates true && exit ;;
 
 		-Iu | --install-updates) checkUpdates true "${*:2}" && exit ;;
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Arch Update Manager"
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="2.0"
 HELP_MESSAGE="\n%s %s, an Archlinux update manager\nUsage: arch-update-manager [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -10,10 +10,13 @@ OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 TAUR_SCRIPT="/home/$USER/.scripts/taur.sh"
 PACMAN_UPDATES_SCRIPT="/home/$USER/.scripts/pacman-updates.sh"
 
-TAUR_NU_SCRIPT="$TAUR_SCRIPT -Nu"
+CONFIG_FOLDER_PATH="/home/$USER/.config/Arch Update Manager/"
+CONFIG_FILE_PATH="${CONFIG_FOLDER_PATH}aum.conf"
+
+TAUR_NU_SCRIPT="$TAUR_SCRIPT -q -Synu"
 PACMAN_UPDATES_NU_SCRIPT="$PACMAN_UPDATES_SCRIPT -Nu"
 
-TAUR_LU_SCRIPT="$TAUR_SCRIPT -Lu"
+TAUR_LU_SCRIPT="$TAUR_SCRIPT -q -Sylu"
 PACMAN_UPDATES_LU_SCRIPT="$PACMAN_UPDATES_SCRIPT -Lu"
 
 LIST_UPDATES=false
@@ -65,5 +68,3 @@ while [[ "$1" =~ ^- ]]; do
 
 	shift
 done
-
-#getTotalNumberOfUpdates
