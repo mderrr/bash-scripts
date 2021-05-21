@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 SCRIPT_NAME="Custom Bar Script"
-SCRIPT_VERSION="1.1"
+SCRIPT_VERSION="1.2"
 HELP_MESSAGE="\n%s %s, a script for gnome custom bar extension\nUsage: custom-bar-script [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -a, --all\t\t\treturn all bar information\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -68,8 +68,17 @@ function getAllInfo() {
 	memory_size=${memory_size:0:-1}
 	memory_size=${memory_size//,/.}
 	local memory_used=$(free -h --si | awk '/Mem:/ {print $3}')
-	memory_used=${memory_used:0:-1} 
+	local memory_used_unit=${memory_used[-1]}
 	memory_used=${memory_used//,/.}
+	memory_used=${memory_used:0:-1}
+
+	if [[ $memory_used_unit == "M" ]]; then
+		memory_used=$(( memory_used / 1000.0 ))
+		memory_used=${memory_used:0:5}
+	fi
+
+	memory_used=${memory_used:0:-1}
+
 	local memory_free=$(free -h --si | awk '/Mem:/ {print $4}')
 	memory_free=${memory_free:0:-1}
 	memory_free=${memory_free//,/.}
