@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/zsh
 
-SCRIPT_VERSION="2.1"
+SCRIPT_VERSION="2.2"
 SCRIPT_NAME="Dentry Generator"
 
 HELP_MESSAGE="\n%s %s, a .desktop File Generator\nUsage: dentry-gen [Options]... [Executable Path]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -v, --verbose\t\t\tPrompt all desktop entry options\n -I, --icon\t\t\tSpecify an icon for the desktop entry\n -u, --uninstall\t\tUninstall a previously installed desktop entry\n\n"

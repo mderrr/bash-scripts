@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/zsh
 
-SCRIPT_VERSION="1.8"
+SCRIPT_VERSION="1.9"
 SCRIPT_NAME="Font Install"
 
 HELP_MESSAGE="\n%s %s, an Archlinux Automatic Font Installer \nUsage: font-installer [Options]... [Fonts Folder]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -F, --format\t\t\tSpecify a file format for the font files\n\n"

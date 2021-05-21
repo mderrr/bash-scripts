@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/zsh
 
 SCRIPT_NAME="Export Configs"
-SCRIPT_VERSION="1.5"
-HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version.\n -h, --help\t\t\tShow this help message.\n -S, --sync-repo\t\tSync the repository (git pull)\n -Su, --sync-update\t\tSync the repository and update destination directory\n\n"
+SCRIPT_VERSION="1.6"
+HELP_MESSAGE="\n%s %s, a Tool to get config files\nUsage: export-configs [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/zsh
 
-SCRIPT_VERSION="1.9"
+SCRIPT_VERSION="2.0"
 SCRIPT_NAME="Template Gen"
 
 HELP_MESSAGE="\n%s %s, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tNo prompts, use defaults\n -v, --verbose\t\t\tAsk for all the script details\n -d, --directory\t\tSpecify a directory to place the script in\n\n"
@@ -31,7 +31,7 @@ function writeFile() {
     printf "#!/bin/bash\n\n" > $file_path
     printf "SCRIPT_NAME=\"$script_name\"\n" >> $file_path
     printf "SCRIPT_VERSION=\"$script_version\"\n" >> $file_path
-    printf "HELP_MESSAGE=\"\\\n%%s %%s, $script_description\\\nUsage: $file_name [Options]... [$script_usage_action]\\\n\\\nOptions:\\\n -V, --version\\\t\\\t\\\tDisplay script version.\\\n -h, --help\\\t\\\t\\\tShow this help message.\\\n\\\n\"\n" >> $file_path
+    printf "HELP_MESSAGE=\"\\\n%%s %%s, $script_description\\\nUsage: $file_name [Options]... [$script_usage_action]\\\n\\\nOptions:\\\n -V, --version\\\t\\\t\\\tDisplay script version\\\n -h, --help\\\t\\\t\\\tShow this help message\\\n\\\n\"\n" >> $file_path
     printf "VERSION_MESSAGE=\"%%s version %%s\\\n\"\n\n" >> $file_path
     printf "OPTION_NOT_RECOGNIZED_MESSAGE=\"Option %%s not recognized\\\n\"\n\n" >> $file_path
     printf "while [[ \"\$1\" =~ ^- ]]; do\n" >> $file_path

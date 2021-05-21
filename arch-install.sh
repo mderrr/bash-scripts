@@ -1,9 +1,9 @@
 #!/bin/bash
 
 SCRIPT_NAME="Arch Install"
-SCRIPT_VERSION="2.4"
+SCRIPT_VERSION="2.5"
 
-HELP_MESSAGE="\n%s %s, an Archlinux Installer\nUsage: arch-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
+HELP_MESSAGE="\n%s %s, an Archlinux Installer\nUsage: arch-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version\n -h, --help\t\tShow this help message\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
@@ -128,7 +128,7 @@ function main() {
 	grub-mkconfig -o /boot/grub/grub.cfg
 	pacman -S --noconfirm networkmanager
 	systemctl enable NetworkManager
-	pacman -S --noconfirm neovim git python-pip tk doas neofetch
+	pacman -S --noconfirm neovim git python-pip tk doas neofetch sysstat
 	printf "permit $user_name as root" > /etc/doas.conf
 	EOT
 
