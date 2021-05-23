@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 SCRIPT_NAME="XMonad Install"
 SCRIPT_VERSION="3.4"
@@ -129,7 +129,7 @@ function installPrev() {
 }
 
 function installXmonad() {
-	pacman -S --noconfirm xmonad xmonad-contrib xmobar xterm rxvt-unicode
+	pacman -S --noconfirm xmonad xmonad-contrib xmobar xterm rxvt-unicode alacritty
 }
 
 function installExtras() {
@@ -164,6 +164,9 @@ function main() {
 	installPulseAudio
 	setKeymap
 
+	# xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search # Set nemo defañit
+	# gsettings set org.cinnamon.desktop.default-applications.terminal exec <terminal-name> # to ala
+
 	getConfigs
 
 	reboot
@@ -175,6 +178,8 @@ while [[ "$1" =~ ^- ]]; do
 		-h | --help) printf "$HELP_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
 		-V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
+
+		-k | --set-keys) setKeyMap && exit ;;		
 
 		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
 
