@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="2.0"
+SCRIPT_VERSION="2.1"
 SCRIPT_NAME="Template Gen"
 
 HELP_MESSAGE="\n%s %s, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tNo prompts, use defaults\n -v, --verbose\t\t\tAsk for all the script details\n -d, --directory\t\tSpecify a directory to place the script in\n\n"
@@ -28,7 +28,7 @@ function writeFile() {
     local script_version=${5:-$DEFAULT_SCRIPT_VERSION}
     local script_usage_action=${6:-$DEFAULT_SCRIPT_USAGE_ACTION}
 
-    printf "#!/bin/bash\n\n" > $file_path
+    printf "#!/bin/zsh\n\n" > $file_path
     printf "SCRIPT_NAME=\"$script_name\"\n" >> $file_path
     printf "SCRIPT_VERSION=\"$script_version\"\n" >> $file_path
     printf "HELP_MESSAGE=\"\\\n%%s %%s, $script_description\\\nUsage: $file_name [Options]... [$script_usage_action]\\\n\\\nOptions:\\\n -V, --version\\\t\\\t\\\tDisplay script version\\\n -h, --help\\\t\\\t\\\tShow this help message\\\n\\\n\"\n" >> $file_path
@@ -49,7 +49,8 @@ function writeFile() {
 function createFile() {
     local custom_path=${1:-$DEFAULT_FILE_PATH}
     local script_name=$2
-    local file_name=${script_name,,} && file_name=${file_name// /-} && file_name="${file_name}.sh"
+
+    local file_name=${script_name:l} && file_name=${file_name//" "/-} && file_name="${file_name}.sh"
     local file_path="$custom_path/$file_name"
     local script_description=""
     local script_version=""
