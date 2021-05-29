@@ -1,9 +1,9 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="3.1"
+SCRIPT_VERSION="3.2"
 SCRIPT_NAME="TAUR"
 
-HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -I, --install\t\t\tInstall the specified package (Default Option)\n -u, --update\t\t\tFind updates for installed packages\n -Iu, --install-updates\t\tFind and Install updates for installed packages\n -Q, --query\t\t\tSearch installed packages\n\n"
+HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tEnable quiet mode\n -Nu, --number-of-updates\tDisplay the number of available updates\n -S, --sync-package\t\tInstall an AUR package\n -Su, --sync-updates\t\tInstall available updates\n -Sy, --sync-database\t\tSync with the AUR's database\n -Syu, --sync-and-update\tSync database then install available updates\n -Synu\t\t\t\tSync database then display number of updates\n -Q, --query\t\t\tDisplay installed packages\n -Qu, --query-updates\t\tDisplay packages with available updates\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
@@ -24,7 +24,7 @@ SYNCING_AUR_PACKAGES_DONE_MESSAGE="AUR package database is up to date\n"
 
 CONFIG_FILE_PACKAGE_HEADER="[Package]\t\t\t\t\t\t[Version]\n"
 
-CONFIG_DIR_PATH=$"/home/$USER/.config/taur/"
+CONFIG_DIR_PATH="/home/$USER/.config/taur/"
 
 CONFIG_FILE_PATH="${CONFIG_DIR_PATH}taur.conf"
 
@@ -129,8 +129,8 @@ function deleteCoincidences() {
 
 function fetchCurrentVersion() {
 	local package_name=$1
-	local package_pkgver=$(curl -s "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=${package_name}" | sed -n '/^pkgver=/p') && package_pkgver=${package_pkgver:7}
-	local package_pkgrel=$(curl -s "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=${package_name}" | sed -n '/^pkgrel=/p') && package_pkgrel=${package_pkgrel:7}
+	local package_pkgver=$(curl -s "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=${package_name}" | awk '/pkgver=/') && package_pkgver=${package_pkgver##*=}
+	local package_pkgrel=$(curl -s "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=${package_name}" | awk '/pkgrel=/') && package_pkgrel=${package_pkgrel##*=}
 	local lastest_version="${package_pkgver}-${package_pkgrel}"
 
     echo $lastest_version
@@ -239,15 +239,13 @@ function syncAurPackages() {
 	fi
 
 	for ((i = 1 ; i < $number_of_lines + 1 ; i++)); do
-		local current_line=$(sed "${i}q;d" $INSTALLED_PACKAGES_FILE_PATH)
-		local version=($current_line) && version=${version[-1]}
-		local package_name=${current_line% $version}
+		local package_name=$(cat "$INSTALLED_PACKAGES_FILE_PATH" | awk '{i++}i=='"$i"' {print $1}')
+		local package_version=$(cat "$INSTALLED_PACKAGES_FILE_PATH" | awk '{i++}i=='"$i"' {print $2}')
 		local latest_version=$(fetchCurrentVersion "$package_name")
 
-		if [[ $version != $latest_version ]]; then
+		if [[ $package_version != $latest_version ]]; then
 			printf "%s\n" "$package_name" > "$OUTDATED_PACKAGES_FILE_PATH"
 		fi
-
 	done
 
 	if [[ $QUIET_MODE_ENABLED != 0 ]]; then
@@ -288,11 +286,11 @@ function syncDatabasesAndUpdate() {
 }
 
 function displayQueryResults() {
-	local filter=${1,,}
-	local number_of_lines=$(wc -l $INSTALLED_PACKAGES_FILE_PATH) && number_of_lines=${number_of_lines%"$INSTALLED_PACKAGES_FILE_PATH"} && number_of_lines=$(("$number_of_lines + 1"))
+	local filter=${1:l}
+	local number_of_lines=$(wc -l < $INSTALLED_PACKAGES_FILE_PATH)
 	local query_results=()
 
-	for ((i = 1 ; i < $number_of_lines ; i++)); do
+	for ((i = 1 ; i < $number_of_lines + 1 ; i++)); do
 		local current_line=$(sed "${i}q;d" $INSTALLED_PACKAGES_FILE_PATH)
 
 		if [[ -z $filter ]]; then
@@ -315,6 +313,21 @@ function displayQueryResults() {
 	done
 }
 
+function installAvailableUpdates() {
+	local number_of_updates=$(wc -l < $OUTDATED_PACKAGES_FILE_PATH)
+
+	if [[ number_of_updates == 0 ]]; then
+		printf "There are no available updates to install. Did you sync the database?\n"
+		exit 0
+	fi
+
+	for ((i = 1 ; i < $number_of_updates + 1 ; i++)); do
+		local package_name=$(cat "$OUTDATED_PACKAGES_FILE_PATH" | awk '{i++}i=='"$i"' {print $1}')
+
+		installPackage "$package_name"
+	done
+}
+
 while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
@@ -324,23 +337,21 @@ while [[ "$1" =~ ^- ]]; do
 
 		-q | --quiet) QUIET_MODE_ENABLED=0 && shift && continue ;;
 
+		-Nu | --number-of-updates) getAvailableUpdates false && exit ;;
+
 		-S | --sync-package) installPackage $2 && exit ;;
 
-		-Sy | --sync-databases) syncAurPackages && exit ;;
+		-Su | --sync-updates) installAvailableUpdates && exit ;;
+
+		-Sy | --sync-database) syncAurPackages && exit ;;
 
 		-Syu | --sync-and-update) syncDatabasesAndUpdate && exit ;;
 
-		-Nu | --number-of-updates) getAvailableUpdates false && exit ;;
-
 		-Synu) syncAurPackages && getAvailableUpdates false && exit ;;
 
-		-Lu | --list-updates) getAvailableUpdates true && exit ;;
-
-		-Sylu) syncAurPackages && getAvailableUpdates true && exit ;;
-
-		-Iu | --install-updates) checkUpdates true "${*:2}" && exit ;;
-
 		-Q | --query) displayQueryResults $2 && exit ;;
+
+		-Qu | --query-updates) getAvailableUpdates true && exit ;;
 
         -*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
