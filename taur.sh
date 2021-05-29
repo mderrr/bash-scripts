@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="3.2"
+SCRIPT_VERSION="3.3"
 SCRIPT_NAME="TAUR"
 
 HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tEnable quiet mode\n -Nu, --number-of-updates\tDisplay the number of available updates\n -S, --sync-package\t\tInstall an AUR package\n -Su, --sync-updates\t\tInstall available updates\n -Sy, --sync-database\t\tSync with the AUR's database\n -Syu, --sync-and-update\tSync database then install available updates\n -Synu\t\t\t\tSync database then display number of updates\n -Q, --query\t\t\tDisplay installed packages\n -Qu, --query-updates\t\tDisplay packages with available updates\n\n"
@@ -347,7 +347,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-Syu | --sync-and-update) syncDatabasesAndUpdate && exit ;;
 
-		-Synu) syncAurPackages && getAvailableUpdates false && exit ;;
+		-Synu) QUIET_MODE_ENABLED=0 && syncAurPackages && getAvailableUpdates false && exit ;;
 
 		-Q | --query) displayQueryResults $2 && exit ;;
 
