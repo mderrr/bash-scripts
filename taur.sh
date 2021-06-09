@@ -1,9 +1,9 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="3.3"
+SCRIPT_VERSION="3.5"
 SCRIPT_NAME="TAUR"
 
-HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tEnable quiet mode\n -Nu, --number-of-updates\tDisplay the number of available updates\n -S, --sync-package\t\tInstall an AUR package\n -Su, --sync-updates\t\tInstall available updates\n -Sy, --sync-database\t\tSync with the AUR's database\n -Syu, --sync-and-update\tSync database then install available updates\n -Synu\t\t\t\tSync database then display number of updates\n -Q, --query\t\t\tDisplay installed packages\n -Qu, --query-updates\t\tDisplay packages with available updates\n\n"
+HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tEnable quiet mode\n -Nu, --number-of-updates\tDisplay the number of available updates\n -Q, --query\t\t\tDisplay installed packages\n -Qu, --query-updates\t\tDisplay packages with available updates\n -S, --sync-package\t\tInstall an AUR package\n -Su, --sync-updates\t\tInstall available updates\n -Sy, --sync-database\t\tSync with the AUR's database\n -Syu, --sync-and-update\tSync database then install available updates\n -Synu\t\t\t\tSync database then display number of updates\n -Syqu\t\t\t\tSync database then display packages with available updates\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
@@ -343,6 +343,10 @@ while [[ "$1" =~ ^- ]]; do
 
 		-Nu | --number-of-updates) getAvailableUpdates false && exit ;;
 
+		-Q | --query) displayQueryResults $2 && exit ;;
+
+		-Qu | --query-updates) getAvailableUpdates true && exit ;;
+
 		-S | --sync-package) installPackage $2 && exit ;;
 
 		-Su | --sync-updates) installAvailableUpdates && exit ;;
@@ -353,9 +357,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-Synu) QUIET_MODE_ENABLED=0 && syncAurPackages && getAvailableUpdates false && exit ;;
 
-		-Q | --query) displayQueryResults $2 && exit ;;
-
-		-Qu | --query-updates) getAvailableUpdates true && exit ;;
+		-Syqu) QUIET_MODE_ENABLED=0 && syncAurPackages && getAvailableUpdates true && exit ;;
 
         -*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
