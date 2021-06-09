@@ -18,19 +18,7 @@ function getNumberOfUpdates() {
 function getUpdatesList() {
     syncronizeRepos
 
-    local pacman_qu=( $(pacman -Qu) )
-    local updates_list=()
-
-    for ((i = 0 ; i < ${#pacman_qu[@]} ; i++)); do
-        local item=${pacman_qu[$i]}
-        local is_multiple_of_four=$(($i % 4 ))
-
-        if [[ $is_multiple_of_four == 0 ]]; then
-            updates_list+=($item) 
-        fi
-    done
-
-    echo ${updates_list[@]}
+    pacman -Qu | awk '{print $1}'
 }
 
 while [[ "$1" =~ ^- ]]; do

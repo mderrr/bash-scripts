@@ -262,7 +262,11 @@ function getAvailableUpdates() {
 	done < $OUTDATED_PACKAGES_FILE_PATH
 
 	if [[ $return_list == true ]]; then
-		echo ${list_of_outdated_packages[@]}
+		if [[ ${#list_of_outdated_packages[@]} < 1 ]]; then
+			printf "" && exit
+		fi
+
+		printf "%s\n" "${list_of_outdated_packages[@]}"
 	else
 		echo ${#list_of_outdated_packages[@]}
 	fi
