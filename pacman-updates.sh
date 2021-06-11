@@ -32,7 +32,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-Nu | --number-of-updates) getNumberOfUpdates && exit ;;
 
-		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
+		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 

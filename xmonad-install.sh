@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 SCRIPT_NAME="XMonad Install"
-SCRIPT_VERSION="3.4"
+SCRIPT_VERSION="3.5"
 HELP_MESSAGE="\n%s %s, an xmonad wm installer\nUsage: xmonad-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version.\n -h, --help\t\tShow this help message.\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -133,7 +133,7 @@ function installXmonad() {
 }
 
 function installExtras() {
-	pacman -S --noconfirm firefox dmenu deja-dup nitrogen qtkeychain gnome-keyring
+	pacman -S --noconfirm firefox dmenu deja-dup nitrogen qtkeychain gnome-keyring dunst
 }
 
 function installPulseAudio() {
@@ -181,7 +181,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-k | --set-keys) setKeyMap && exit ;;		
 
-		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
+		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 

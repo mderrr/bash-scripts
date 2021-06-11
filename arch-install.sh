@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_NAME="Arch Install"
-SCRIPT_VERSION="2.5"
+SCRIPT_VERSION="2.6"
 
 HELP_MESSAGE="\n%s %s, an Archlinux Installer\nUsage: arch-install [Options]... [Place Holder]\n\nOptions:\n -V, --version\t\tDisplay script version\n -h, --help\t\tShow this help message\n\n"
 VERSION_MESSAGE="%s version %s\n"
@@ -147,7 +147,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-p | --manual-partition) MANUAL_PARTITION=true && shift && continue ;;
 
-		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
+		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 

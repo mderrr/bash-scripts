@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 SCRIPT_NAME="Arch Update Manager"
-SCRIPT_VERSION="2.1"
+SCRIPT_VERSION="2.2"
 HELP_MESSAGE="\n%s %s, an Archlinux update manager\nUsage: arch-update-manager [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -Lu, --list-updates\t\tReturn a list of the updates\n -A, --aur\t\t\tGet the number of AUR updates\n -P, --pacman\t\t\tGet the number of pacman updates\n -T, --total\t\t\tGet the sum of all available updates\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -62,7 +62,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-T | --total) getTotalNumberOfUpdates && exit ;;
 
-		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
+		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 

@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="2.1"
+SCRIPT_VERSION="2.2"
 SCRIPT_NAME="Template Gen"
 
 HELP_MESSAGE="\n%s %s, a Bash Template Generator\nUsage: template-gen [Options]... [Script Name]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tNo prompts, use defaults\n -v, --verbose\t\t\tAsk for all the script details\n -d, --directory\t\tSpecify a directory to place the script in\n\n"
@@ -38,7 +38,7 @@ function writeFile() {
     printf "\tcase \"\$1\" in\n\n" >> $file_path
     printf "\t\t-h | --help) printf \"\$HELP_MESSAGE\" \"\$SCRIPT_NAME\" \"\$SCRIPT_VERSION\" & exit ;;\n\n" >> $file_path
     printf "\t\t-V | --version) printf \"\$VERSION_MESSAGE\" \"\$SCRIPT_NAME\" \"\$SCRIPT_VERSION\" & exit ;;\n\n" >> $file_path
-    printf "\t\t-*) printf \"\$OPTION_NOT_RECOGNIZED_MESSAGE\" \"\$file_path\" & exit ;;\n\n" >> $file_path
+    printf "\t\t-*) printf \"\$OPTION_NOT_RECOGNIZED_MESSAGE\" \"\$1\" & exit ;;\n\n" >> $file_path
     printf "\tesac\n\n" >> $file_path
     printf "\tshift\n" >> $file_path
     printf "done" >> $file_path

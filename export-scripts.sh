@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 SCRIPT_NAME="Export Scripts"
-SCRIPT_VERSION="1.3"
+SCRIPT_VERSION="1.4"
 HELP_MESSAGE="\n%s %s, a Bash Script Exporter\nUsage: export-scripts [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -S, --sync-repo\t\tSync the repository (git pull)\n -Su, --sync-update\t\tSync the repository and update destination directory\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -63,7 +63,7 @@ while [[ "$1" =~ ^- ]]; do
 
 		-Su | --sync-update) syncRepository ;;
 
-		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$file_path" & exit ;;
+		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
 	esac
 
