@@ -1,8 +1,8 @@
 #!/bin/zsh
 
 SCRIPT_NAME="Shutdown Handler"
-SCRIPT_VERSION="0.2"
-HELP_MESSAGE="\n%s %s, a Script to manage shutdowns\nUsage: shutdown-handler [Options]... [Status]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n\n"
+SCRIPT_VERSION="0.3"
+HELP_MESSAGE="\n%s %s, a Script to manage shutdowns\nUsage: shutdown-handler [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -s, --shutdown\t\t\tInitiate the shutdown process (default option)\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
@@ -14,7 +14,7 @@ NOTIFICATION_PERIOD=1000
 NOTIFICATION_TIMEOUT=5
 
 function handle_countdown_done() {
-	printf "COUI SONE\n"
+	shutdown now
 }
 
 function handle_clicked() {
@@ -28,7 +28,6 @@ function handle_dismiss() {
 	sleep $time_left
 	handle_countdown_done
 }
-
 
 function main() {
 	for ((i = $NOTIFICATION_TIMEOUT ; i >= 0 ; i--)); do
@@ -56,6 +55,8 @@ while [[ "$1" =~ ^- ]]; do
 		-h | --help) printf "$HELP_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
 
 		-V | --version) printf "$VERSION_MESSAGE" "$SCRIPT_NAME" "$SCRIPT_VERSION" & exit ;;
+
+		-s | --shutdown) main && exit ;;
 
 		-*) printf "$OPTION_NOT_RECOGNIZED_MESSAGE" "$1" & exit ;;
 
