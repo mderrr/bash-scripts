@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 SCRIPT_NAME="Shutdown Handler"
-SCRIPT_VERSION="0.3"
+SCRIPT_VERSION="0.4"
 HELP_MESSAGE="\n%s %s, a Script to manage shutdowns\nUsage: shutdown-handler [Options]...\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -s, --shutdown\t\t\tInitiate the shutdown process (default option)\n\n"
 VERSION_MESSAGE="%s version %s\n"
 
@@ -11,7 +11,7 @@ POWER_WAITING_ICON_PATH="/home/santiago/.config/dunst/icons/power-waiting.png"
 POWER_ICON_PATH="/home/santiago/.config/dunst/icons/power.png"
 
 NOTIFICATION_PERIOD=1000
-NOTIFICATION_TIMEOUT=5
+NOTIFICATION_TIMEOUT=30
 
 function handle_countdown_done() {
 	shutdown now
