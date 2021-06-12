@@ -3,7 +3,7 @@
 export HISTIGNORE='*sudo -S*'
 
 function syncronizeRepos() {
-    passwd=$(/home/$USER/.scripts/pass.sh) &> /dev/null
+    passwd=$(/home/$USER/.scripts/pass.sh) #&> /dev/null
     echo "$passwd" | sudo -S -k pacman -Sy &> /dev/null
 }
 
