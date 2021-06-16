@@ -3,7 +3,7 @@
 SCRIPT_VERSION="3.5"
 SCRIPT_NAME="TAUR"
 
-HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tEnable quiet mode\n -Nu, --number-of-updates\tDisplay the number of available updates\n -Q, --query\t\t\tDisplay installed packages\n -Qu, --query-updates\t\tDisplay packages with available updates\n -S, --sync-package\t\tInstall an AUR package\n -Su, --sync-updates\t\tInstall available updates\n -Sy, --sync-database\t\tSync with the AUR's database\n -Syu, --sync-and-update\tSync database then install available updates\n -Synu\t\t\t\tSync database then display number of updates\n -Syqu\t\t\t\tSync database then display packages with available updates\n\n"
+HELP_MESSAGE="\n%s %s, a Tool for the Arch User Repository\nUsage: taur [Options]... [AUR Link]\n\nOptions:\n -V, --version\t\t\tDisplay script version\n -h, --help\t\t\tShow this help message\n -q, --quiet\t\t\tEnable quiet mode\n -Nu, --number-of-updates\tDisplay the number of available updates\n -Q, --query\t\t\tDisplay installed packages\n -Qu, --query-updates\t\tDisplay packages with available updates\n -Mu, --manage-updates\t\tShow the update manager prompt\n -S, --sync-package\t\tInstall an AUR package\n -Su, --sync-updates\t\tInstall available updates\n -Sy, --sync-database\t\tSync with the AUR's database\n -Syu, --sync-and-update\tSync database then install available updates\n -Synu\t\t\t\tSync database then display number of updates\n -Syqu\t\t\t\tSync database then display packages with available updates\n\n"
 VERSION_MESSAGE="%s version %s\n"
 OPTION_NOT_RECOGNIZED_MESSAGE="Option %s not recognized\n"
 
@@ -332,6 +332,71 @@ function installAvailableUpdates() {
 	done
 }
 
+center() {
+	local text=$*
+
+	printf "%*s" $(( (${#text} + COLUMNS) / 2 )) "$text"
+}
+
+function manageUpdates() {
+	local number_of_updates=$(wc -l < $OUTDATED_PACKAGES_FILE_PATH)
+
+	
+	local no_updates_message="nothing to do"
+
+	local no_update_title="TAUR Updates Manager"
+	local no_update_message="No Available Updates"
+
+	local single_update_title="TAUR Updates Manager"
+	local single_update_message="1 Update Available"
+
+	local multiple_update_title="TAUR Update Manager"
+	local multiple_update_message="$number_of_updates Updates Available"
+
+	local prompt_title
+	local prompt_message
+	local message_color
+	local install_color 
+
+	if [[ $number_of_updates == 0 ]]; then
+		prompt_title=$no_update_title
+		prompt_message=$no_update_message 
+
+	elif [[ $number_of_updates == 1 ]]; then
+		prompt_title=$single_update_title
+		prompt_message=$single_update_message
+		message_color=33
+		install_color=32
+
+	else
+		prompt_title=$multiple_update_title
+		prompt_message=$multiple_update_message
+		message_color=33
+		install_color=32
+	fi
+
+	printf "\e[1;31m%s\e[m\n" "$(center $prompt_title)"
+	printf "\e[1;${message_color}m%s\e[m\n\n" "$(center $prompt_message)"
+
+	for ((i = 1 ; i < $number_of_updates + 1 ; i++)); do
+		local package_name=$(cat "$OUTDATED_PACKAGES_FILE_PATH" | awk '{i++}i=='"$i"' {print $1}')
+
+		printf " • %s\n" "$package_name"
+	done 
+
+	printf "\n \e[1;${install_color}minstall\e[m or \e[1;31mquit ❯\e[m "
+
+	read choice
+
+	case "$choice" in
+
+		q | exit | quit | [nN][oO] | [nN]) exit ;;
+
+		install | [sS] | [iI] | [yY][eE][sS] | [yY]) installAvailableUpdates ;;
+
+	esac
+}
+
 while [[ "$1" =~ ^- ]]; do
 	case "$1" in
 
@@ -346,6 +411,8 @@ while [[ "$1" =~ ^- ]]; do
 		-Q | --query) displayQueryResults $2 && exit ;;
 
 		-Qu | --query-updates) getAvailableUpdates true && exit ;;
+
+		-Mu | --manage-updates) manageUpdates && exit ;;
 
 		-S | --sync-package) installPackage $2 && exit ;;
 

@@ -137,7 +137,7 @@ function installExtras() {
 }
 
 function installPulseAudio() {
-	pacman -S --noconfirm alsa-utils pulseaudio pulseaudio-alsa pavucontrol lxappearance
+	pacman -S --noconfirm alsa-utils pulseaudio pulseaudio-alsa pavucontrol lxappearance sxiv neovide
 	pulseaudio --check
 	su -c 'pulseaudio -D' $USER_NAME
 }
