@@ -35,10 +35,10 @@ function exportScripts() {
 	printf "$UPDATING_REPOSITORY_MESSAGE"
     for script in $SCRIPTS_REPOSITORY*; do
         local script_name=${script##*/} 
-		local scripts_destination_path="${SCRIPTS_DESTINATION_DIRECTORY}$script_name"
+		local scripts_destination_path="${SCRIPTS_DESTINATION_DIRECTORY}" # "$script_name"
         
         if ! [[ ${EXCLUDED_FILES_FROM_SCRIPTS[*]} =~ $script_name ]]; then
-			cp $script $scripts_destination_path
+			cp --remove-destination -R $script $scripts_destination_path
 			chown -R "${USER_NAME}:${USER_NAME}" "$scripts_destination_path"
         fi
     done
