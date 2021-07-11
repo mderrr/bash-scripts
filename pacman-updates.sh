@@ -86,7 +86,7 @@ function manageUpdates() {
 
 		q | exit | quit | [nN][oO] | [nN]) exit ;;
 
-		install | [sS] | [iI] | [yY][eE][sS] | [yY]) doas pacman -Syu ;;
+		install | [sS] | [iI] | [yY][eE][sS] | [yY]) doas pacman --noconfirm -Syu ;;
 
 	esac
 }
